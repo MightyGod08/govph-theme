@@ -348,8 +348,248 @@ function custom_live_time_shortcode($atts) {
 }
 
 
+// =========================
+// Municipal Ordinances REST API
+// =========================
+function register_ordinances_rest_api() {
+    // Register REST API route for fetching ordinances
+    register_rest_route('govph/v1', '/ordinances', array(
+        'methods'             => 'GET',
+        'callback'            => 'get_ordinances_callback',
+        'permission_callback' => '__return_true',
+        'args'                => array(
+            'page'     => array(
+                'validate_callback' => function($param) {
+                    return is_numeric($param);
+                },
+                'default'           => 1,
+            ),
+            'per_page' => array(
+                'validate_callback' => function($param) {
+                    return is_numeric($param) && $param <= 100;
+                },
+                'default'           => 10,
+            ),
+            'search'   => array(
+                'validate_callback' => function($param) {
+                    return is_string($param);
+                },
+                'default'           => '',
+            ),
+        ),
+    ));
+
+    // Register REST API route for single ordinance
+    register_rest_route('govph/v1', '/ordinances/(?P<id>\d+)', array(
+        'methods'             => 'GET',
+        'callback'            => 'get_single_ordinance_callback',
+        'permission_callback' => '__return_true',
+        'args'                => array(
+            'id' => array(
+                'validate_callback' => function($param) {
+                    return is_numeric($param);
+                },
+            ),
+        ),
+    ));
+}
+add_action('rest_api_init', 'register_ordinances_rest_api');
+
+function get_ordinances_callback(WP_REST_Request $request) {
+    $page     = intval($request->get_param('page'));
+    $per_page = intval($request->get_param('per_page'));
+    $search   = sanitize_text_field($request->get_param('search'));
+
+    // Build query arguments
+    $args = array(
+        'post_type'      => 'post', // Change to custom post type if needed
+        'posts_per_page' => $per_page,
+        'paged'          => $page,
+        'post_status'    => 'publish',
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    );
+
+    // Add search parameter if provided
+    if (!empty($search)) {
+        $args['s'] = $search;
+    }
+
+    // Query posts
+    $query = new WP_Query($args);
+
+    if (!$query->have_posts()) {
+        return new WP_REST_Response(array(
+            'success' => false,
+            'message' => 'No ordinances found',
+            'data'    => array(),
+        ), 404);
+    }
+
+    // Build response data
+    $ordinances = array();
+    foreach ($query->posts as $post) {
+        $ordinances[] = array(
+            'id'          => $post->ID,
+            'title'       => $post->post_title,
+            'slug'        => $post->post_name,
+            'excerpt'     => wp_trim_words($post->post_content, 20),
+            'date'        => $post->post_date,
+            'date_gmt'    => $post->post_date_gmt,
+            'link'        => get_permalink($post->ID),
+            'status'      => $post->post_status,
+        );
+    }
+
+    return new WP_REST_Response(array(
+        'success'      => true,
+        'data'         => $ordinances,
+        'total'        => $query->found_posts,
+        'pages'        => $query->max_num_pages,
+        'current_page' => $page,
+        'per_page'     => $per_page,
+    ), 200);
+}
+
+/**
+ * Callback to fetch a single ordinance
+ * 
+ * @param WP_REST_Request $request
+ * @return WP_REST_Response|WP_Error
+ */
+function get_single_ordinance_callback(WP_REST_Request $request) {
+    $post_id = intval($request->get_param('id'));
+
+    $post = get_post($post_id);
+
+    if (!$post || $post->post_status !== 'publish') {
+        return new WP_Error(
+            'ordinance_not_found',
+            'Ordinance not found',
+            array('status' => 404)
+        );
+    }
+
+    $response = array(
+        'id'       => $post->ID,
+        'title'    => $post->post_title,
+        'slug'     => $post->post_name,
+        'content'  => wp_kses_post($post->post_content),
+        'excerpt'  => $post->post_excerpt,
+        'date'     => $post->post_date,
+        'date_gmt' => $post->post_date_gmt,
+        'link'     => get_permalink($post->ID),
+        'status'   => $post->post_status,
+        'author'   => array(
+            'id'   => $post->post_author,
+            'name' => get_the_author_meta('display_name', $post->post_author),
+        ),
+    );
+
+    return new WP_REST_Response($response, 200);
+}
+
+// =========================
+// Municipal Ordinances Shortcode
+// =========================
+function ordinances_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 10,
+        'search'   => '',
+    ), $atts, 'ordinances');
+
+    $per_page = intval($atts['per_page']);
+    $search   = sanitize_text_field($atts['search']);
+
+    // Build query arguments
+    $args = array(
+        'post_type'      => 'post',
+        'posts_per_page' => $per_page,
+        'post_status'    => 'publish',
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    );
+
+    if (!empty($search)) {
+        $args['s'] = $search;
+    }
+
+    $query = new WP_Query($args);
+
+    ob_start();
+    ?>
+
+    <div class="ordinances-container-<?php echo esc_attr($instance); ?>" style="padding: 20px 0;">
+        <?php if ($query->have_posts()) : ?>
+            <div style="
+                display: grid;
+                gap: 15px;
+            ">
+                <?php while ($query->have_posts()) : $query->the_post(); ?>
+                    <div style="
+                        border: 1px solid #ddd;
+                        border-radius: 8px;
+                        padding: 20px;
+                        background: #f9f9f9;
+                        transition: box-shadow 0.3s ease;
+                    " onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+                        <h3 style="
+                            margin: 0 0 10px 0;
+                            font-size: 18px;
+                            color: #163447;
+                        ">
+                            <a href="<?php the_permalink(); ?>" style="text-decoration: none; color: #163447;">
+                                <?php the_title(); ?>
+                            </a>
+                        </h3>
+                        <div style="
+                            color: #666;
+                            font-size: 14px;
+                            margin-bottom: 12px;
+                        ">
+                            <?php echo get_the_date('F j, Y'); ?>
+                        </div>
+                        <div style="
+                            color: #555;
+                            line-height: 1.6;
+                            margin-bottom: 12px;
+                        ">
+                            <?php echo wp_trim_words(get_the_content(), 30); ?>
+                        </div>
+                        <a href="<?php the_permalink(); ?>" style="
+                            color: #0b3440;
+                            text-decoration: none;
+                            font-weight: 600;
+                            font-size: 14px;
+                        ">
+                            Read More →
+                        </a>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+            <?php wp_reset_postdata(); ?>
+        <?php else : ?>
+            <div style="
+                text-align: center;
+                padding: 40px 20px;
+                color: #999;
+                font-size: 16px;
+            ">
+                No ordinances found.
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <?php
+    return ob_get_clean();
+}
+
+
 
 // Register shortcode
-// add_shortcode('custom_calendar', 'custom_calendar_shortcode'); 
+add_shortcode('ordinances', 'ordinances_shortcode');
 add_shortcode('camaligan_weather', 'camaligan_weather_shortcode');
 add_shortcode('live_time_card', 'custom_live_time_shortcode');
