@@ -1,0 +1,166 @@
+{
+	"$schema": "https://schemas.wp.org/wp/6.9/theme.json",
+	"version": 3,
+	"settings": {
+		"appearanceTools": true,
+		"color": {
+			"palette": [
+				{
+					"color": "#2d2a634d",
+					"name": "accent",
+					"slug": "custom-accent"
+				},
+				{
+					"color": "#e6b800e6",
+					"name": "Color 1",
+					"slug": "custom-color-1"
+				},
+				{
+					"color": "#0e2f3b",
+					"name": "main1",
+					"slug": "custom-main-1"
+				},
+				{
+					"color": "#d9d9d9",
+					"name": "Color 2",
+					"slug": "custom-color-2"
+				}
+			]
+		},
+		"layout": {
+			"contentSize": "100vw",
+			"wideSize": "1000px"
+		},
+		"spacing": {
+			"units": [
+				"%",
+				"px",
+				"em",
+				"rem",
+				"vh",
+				"vw"
+			]
+		},
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFamily": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif",
+					"name": "System Font",
+					"slug": "system-font"
+				}
+			]
+		},
+		"useRootPaddingAwareAlignments": true
+	},
+	"styles": {
+		"blocks": {
+			"core/button": {
+				"border": {
+					"radius": {
+						"bottomLeft": "6px",
+						"bottomRight": "6px",
+						"topLeft": "6px",
+						"topRight": "6px"
+					}
+				},
+				"color": {
+					"background": "var(--wp--preset--color--luminous-vivid-amber)",
+					"text": "var(--wp--preset--color--custom-main-1)"
+				},
+				"elements": {
+					"link": {
+						"color": {
+							"text": "var(--wp--preset--color--custom-main-1)"
+						}
+					}
+				},
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--system-font)",
+					"fontSize": "var(--wp--preset--font-size--medium)"
+				},
+				"variations": {
+					"outline": {
+						"border": {
+							"bottom": {
+								"color": "var(--wp--preset--color--white)",
+								"style": "solid",
+								"width": "2px"
+							},
+							"left": {
+								"color": "var(--wp--preset--color--white)",
+								"style": "solid",
+								"width": "2px"
+							},
+							"right": {
+								"color": "var(--wp--preset--color--white)",
+								"style": "solid",
+								"width": "2px"
+							},
+							"top": {
+								"color": "var(--wp--preset--color--white)",
+								"style": "solid",
+								"width": "2px"
+							}
+						},
+						"color": {
+							"text": "var(--wp--preset--color--white)"
+						}
+					}
+				}
+			},
+			"core/cover": {
+				"spacing": {
+					"margin": {
+						"bottom": "var(--wp--preset--spacing--20)",
+						"top": "var(--wp--preset--spacing--20)"
+					},
+					"padding": {
+						"bottom": "var(--wp--preset--spacing--30)",
+						"top": "var(--wp--preset--spacing--30)"
+					}
+				}
+			}
+		},
+		"color": {
+			"background": "var(--wp--preset--color--custom-color-2)",
+			"text": "var(--wp--preset--color--custom-main-1)"
+		},
+		"css": ".has-drop-cap:not(:focus)::first-letter {\n  font-size: 4em;\n  font-weight: bold;\n  float: left;\n  line-height: 0.8;\n  margin-right: 8px;\n  color: #0E2F3B;\n  font-family: serif;\n}\n//calendar\n\n/* Wrapper */\n.my-custom-styled-calendar {\n    max-width: 380px;\n    margin: 0 auto;\n    padding: 20px;\n    background: #f8f8f8;\n    border-radius: 16px;\n    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);\n    font-family: inherit;\n}\n\n/* Main calendar table */\n.my-custom-styled-calendar #wp-calendar {\n    width: 100%;\n    border-collapse: separate;\n    border-spacing: 8px;\n    text-align: center;\n    table-layout: fixed;\n}\n\n/* Caption = month/year */\n.my-custom-styled-calendar #wp-calendar caption {\n    caption-side: top;\n    font-size: 28px;\n    font-weight: 700;\n    color: #1f2937;\n    margin-bottom: 18px;\n    text-align: center;\n}\n\n/* Header row: Sun Mon Tue... */\n.my-custom-styled-calendar #wp-calendar thead th {\n    font-size: 15px;\n    font-weight: 600;\n    color: #6b7280;\n    padding: 10px 0;\n    border: none;\n}\n\n/* All cells */\n.my-custom-styled-calendar #wp-calendar tbody td,\n.my-custom-styled-calendar #wp-calendar tfoot td {\n    padding: 0;\n    border: none;\n    background: transparent;\n}\n\n/* Day links */\n.my-custom-styled-calendar #wp-calendar tbody td a {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 38px;\n    height: 38px;\n    text-decoration: none;\n    border-radius: 8px;\n    font-weight: 600;\n    color: #1f2937;\n    background: #ffffff;\n    transition: all 0.2s ease;\n}\n\n/* Normal day numbers without links */\n.my-custom-styled-calendar #wp-calendar tbody td {\n    width: 40px;\n    height: 40px;\n    vertical-align: middle;\n    font-size: 16px;\n    font-weight: 500;\n    color: #374151;\n}\n\n/* Hover effect */\n.my-custom-styled-calendar #wp-calendar tbody td a:hover {\n    background: #facc15;\n    color: #111827;\n    transform: translateY(-1px);\n}\n\n/* Today's date */\n.my-custom-styled-calendar #wp-calendar tbody td#today {\n    background: #eab308;\n    color: #111827;\n    border-radius: 8px;\n    font-weight: 700;\n}\n\n/* If today also contains a link */\n.my-custom-styled-calendar #wp-calendar tbody td#today a {\n    background: #eab308;\n    color: #111827;\n    width: 38px;\n    height: 38px;\n    border-radius: 8px;\n    font-weight: 700;\n}\n\n/* Empty cells from previous/next month */\n.my-custom-styled-calendar #wp-calendar tbody td.pad {\n    color: #d1d5db;\n    background: transparent;\n}\n\n/* Prev / Next row */\n.my-custom-styled-calendar #wp-calendar tfoot {\n    margin-top: 12px;\n}\n\n.my-custom-styled-calendar #wp-calendar tfoot td {\n    padding-top: 14px;\n    font-size: 14px;\n    font-weight: 600;\n}\n\n/* Previous month link */\n.my-custom-styled-calendar #wp-calendar tfoot #prev {\n    text-align: left;\n}\n\n.my-custom-styled-calendar #wp-calendar tfoot #prev a {\n    display: inline-block;\n    padding: 8px 14px;\n    background: #ffffff;\n    border-radius: 10px;\n    text-decoration: none;\n    color: #1f2937;\n    box-shadow: 0 2px 6px rgba(0,0,0,0.08);\n}\n\n/* Next month link */\n.my-custom-styled-calendar #wp-calendar tfoot #next {\n    text-align: right;\n}\n\n.my-custom-styled-calendar #wp-calendar tfoot #next a {\n    display: inline-block;\n    padding: 8px 14px;\n    background: #ffffff;\n    border-radius: 10px;\n    text-decoration: none;\n    color: #1f2937;\n    box-shadow: 0 2px 6px rgba(0,0,0,0.08);\n}\n\n/* Hover for prev/next */\n.my-custom-styled-calendar #wp-calendar tfoot a:hover {\n    background: #facc15;\n    color: #111827;\n}\n\n/* Optional: fallback message styling */\n.my-custom-styled-calendar p {\n    margin: 0;\n    text-align: center;\n    color: #6b7280;\n    font-size: 16px;\n}",
+		"elements": {
+			"h1": {
+				"typography": {
+					"fontSize": "64px"
+				}
+			},
+			"h2": {
+				"typography": {
+					"fontSize": "30px"
+				}
+			},
+			"link": {
+				"color": {
+					"text": "var(--wp--preset--color--custom-main-1)"
+				}
+			}
+		},
+		"spacing": {
+			"blockGap": "0px",
+			"padding": {
+				"bottom": "0px",
+				"left": "0px",
+				"right": "0px",
+				"top": "0px"
+			}
+		}
+	},
+	"templateParts": [
+		{
+			"area": "header",
+			"name": "header"
+		},
+		{
+			"area": "footer",
+			"name": "footer"
+		}
+	]
+}
