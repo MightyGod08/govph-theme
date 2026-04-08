@@ -810,9 +810,218 @@ function ordinances_shortcode($atts) {
     return ob_get_clean();
 }
 
+// =========================
+// Latest Annual Reports Shortcode
+// =========================
+function latest_annual_reports_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
 
+    $atts = shortcode_atts(array(
+        'per_page' => 6,
+        'title'    => 'Annual Reports',
+    ), $atts, 'latest_annual_reports');
+
+    $per_page = max(1, min(12, intval($atts['per_page'])));
+    $heading  = sanitize_text_field($atts['title']);
+
+    $request_url = add_query_arg(array(
+        'per_page' => $per_page,
+        'orderby'  => 'date',
+        'order'    => 'desc',
+        '_fields'  => 'id,date,link,title',
+    ), rest_url('wp/v2/annual_report'));
+
+    $response = wp_remote_get($request_url, array(
+        'timeout' => 15,
+        'headers' => array(
+            'Accept' => 'application/json',
+        ),
+    ));
+
+    if (is_wp_error($response)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#fff7f7;color:#9b1c1c;">Unable to load annual reports right now.</div>';
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $reports     = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (200 !== $status_code || !is_array($reports) || empty($reports)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;">No annual reports found.</div>';
+    }
+
+    ob_start();
+    ?>
+    <div class="annual-reports-container-<?php echo esc_attr($instance); ?>" style="padding:20px 0;">
+        <?php if (!empty($heading)) : ?>
+            <h2 style="margin:0 0 18px;color:#163447;font-size:28px;font-weight:700;">
+                <?php echo esc_html($heading); ?>
+            </h2>
+        <?php endif; ?>
+
+        <div style="display:grid;gap:16px;">
+            <?php foreach ($reports as $report) : ?>
+                <?php
+                $post_id   = isset($report['id']) ? intval($report['id']) : 0;
+                $title     = isset($report['title']['rendered']) ? wp_strip_all_tags($report['title']['rendered']) : '';
+                $date      = !empty($report['date']) ? mysql2date('F j, Y', $report['date']) : '';
+                $year      = $post_id ? get_post_meta($post_id, 'annual_report_year', true) : '';
+                $pdf_id    = $post_id ? absint(get_post_meta($post_id, 'annual_report_pdf_id', true)) : 0;
+                $pdf_url   = $pdf_id ? wp_get_attachment_url($pdf_id) : '';
+                $item_link = $pdf_url ? $pdf_url : (!empty($report['link']) ? $report['link'] : '');
+                ?>
+                <article style="border:1px solid #dbe4ea;border-radius:10px;padding:20px;background:#f8fbfd;">
+                    <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+                        <div style="flex:1 1 260px;">
+                            <h3 style="margin:0 0 10px;font-size:20px;line-height:1.35;color:#163447;">
+                                <?php echo esc_html($title); ?>
+                            </h3>
+                            <div style="display:flex;gap:12px;flex-wrap:wrap;color:#5b6b79;font-size:14px;">
+                                <?php if (!empty($year)) : ?>
+                                    <span><?php echo esc_html('Year: ' . $year); ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($date)) : ?>
+                                    <span><?php echo esc_html($date); ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($item_link)) : ?>
+                            <div style="flex:0 0 auto;">
+                                <a href="<?php echo esc_url($item_link); ?>" <?php echo $pdf_url ? 'download' : ''; ?> style="display:inline-block;padding:11px 18px;background:#0b3440;color:#ffffff;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px;">
+                                    <?php echo esc_html($pdf_url ? 'Download PDF' : 'View Report'); ?>
+                                </a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php
+
+    return ob_get_clean();
+}
+
+// =========================
+// Budget Overview Shortcode
+// =========================
+function budget_overview_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 5,
+        'title'    => 'Budget Overview',
+        'summary'  => 'Publish the LGU budget, Annual Investment Plan (AIP), and related appropriations in a clear tabular format. Replace the sample data with the actual figures and ordinance numbers.',
+    ), $atts, 'budget_overview');
+
+    $per_page = max(1, min(12, intval($atts['per_page'])));
+    $heading  = sanitize_text_field($atts['title']);
+    $summary  = sanitize_textarea_field($atts['summary']);
+
+    $request_url = add_query_arg(array(
+        'per_page' => $per_page,
+        'orderby'  => 'date',
+        'order'    => 'desc',
+        '_fields'  => 'id,date,link,title',
+    ), rest_url('wp/v2/budget_overview'));
+
+    $response = wp_remote_get($request_url, array(
+        'timeout' => 15,
+        'headers' => array(
+            'Accept' => 'application/json',
+        ),
+    ));
+
+    if (is_wp_error($response)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#fff7f7;color:#9b1c1c;">Unable to load budget overview right now.</div>';
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $budgets     = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (200 !== $status_code || !is_array($budgets) || empty($budgets)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;">No budget overview entries found.</div>';
+    }
+
+    ob_start();
+    ?>
+    <section class="budget-overview-container-<?php echo esc_attr($instance); ?>" style="padding:28px;background:#ffffff;border:1px solid #d8dee4;border-radius:4px;box-shadow:0 2px 8px rgba(15, 23, 42, 0.12);">
+        <?php if (!empty($heading)) : ?>
+            <h2 style="margin:0 0 14px;color:#163447;font-size:28px;line-height:1.2;font-weight:700;">
+                <?php echo esc_html($heading); ?>
+            </h2>
+        <?php endif; ?>
+
+        <?php if (!empty($summary)) : ?>
+            <p style="margin:0 0 18px;color:#2f3a45;font-size:14px;line-height:1.65;max-width:760px;">
+                <?php echo esc_html($summary); ?>
+            </p>
+        <?php endif; ?>
+
+        <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;min-width:520px;">
+                <thead>
+                    <tr>
+                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-size:14px;font-weight:700;">Year</th>
+                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-size:14px;font-weight:700;">Ordinance No.</th>
+                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-size:14px;font-weight:700;">Total Budget</th>
+                        <th style="padding:0 0 10px;text-align:left;color:#111827;font-size:14px;font-weight:700;">Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($budgets as $budget) : ?>
+                        <?php
+                        $post_id       = isset($budget['id']) ? intval($budget['id']) : 0;
+                        $year          = $post_id ? get_post_meta($post_id, 'budget_overview_year', true) : '';
+                        $ordinance_no  = $post_id ? get_post_meta($post_id, 'budget_overview_ordinance_no', true) : '';
+                        $total_budget  = $post_id ? get_post_meta($post_id, 'budget_overview_total_budget', true) : '';
+                        $pdf_id        = $post_id ? absint(get_post_meta($post_id, 'budget_overview_pdf_id', true)) : 0;
+                        $pdf_url       = $pdf_id ? wp_get_attachment_url($pdf_id) : '';
+                        $fallback_link = !empty($budget['link']) ? $budget['link'] : '';
+                        $download_link = $pdf_url ? $pdf_url : $fallback_link;
+                        ?>
+                        <tr>
+                            <td style="padding:0 14px 12px 0;color:#1f2937;font-size:14px;vertical-align:top;">
+                                <?php echo esc_html($year ?: 'N/A'); ?>
+                            </td>
+                            <td style="padding:0 14px 12px 0;color:#1f2937;font-size:14px;vertical-align:top;">
+                                <?php echo esc_html($ordinance_no ?: 'N/A'); ?>
+                            </td>
+                            <td style="padding:0 14px 12px 0;color:#1f2937;font-size:14px;vertical-align:top;">
+                                <?php echo esc_html($total_budget ?: 'N/A'); ?>
+                            </td>
+                            <td style="padding:0 0 12px;color:#1f2937;font-size:14px;vertical-align:top;">
+                                <?php if (!empty($download_link)) : ?>
+                                    <a href="<?php echo esc_url($download_link); ?>" <?php echo $pdf_url ? 'download' : ''; ?> style="color:#6b8fe8;text-decoration:underline;">
+                                        View PDF
+                                    </a>
+                                <?php else : ?>
+                                    <span style="color:#94a3b8;">No PDF</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <?php
+
+    return ob_get_clean();
+}
 
 // Register shortcode
 add_shortcode('ordinances', 'ordinances_shortcode');
+add_shortcode('latest_annual_reports', 'latest_annual_reports_shortcode');
+add_shortcode('annual_reports', 'latest_annual_reports_shortcode');
+add_shortcode('budget_overview', 'budget_overview_shortcode');
+add_shortcode('latest_budget_overview', 'budget_overview_shortcode');
 add_shortcode('camaligan_weather', 'camaligan_weather_shortcode');
 add_shortcode('live_time_card', 'custom_live_time_shortcode');
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 697a8ad9144280398c085240175f66e1cc7c579c
