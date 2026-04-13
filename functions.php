@@ -1339,6 +1339,157 @@ add_shortcode('camaligan_weather', 'camaligan_weather_shortcode');
 add_shortcode('live_time_card', 'custom_live_time_shortcode');
 
 // =========================
+// Events Shortcode - Fetches from /wp-json/wp/v2/event (New)
+// =========================
+
+function events_feed_script() {
+    wp_enqueue_script(
+        'events-feed-js',
+        get_template_directory_uri() . '/js/events-feed.js',
+        array(),
+        '1.0',
+        true
+    );
+}
+
+add_action('wp_enqueue_scripts', 'events_feed_script');
+
+function events_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 6,
+    ), $atts, 'events');
+
+    $per_page = max(1, min(12, intval($atts['per_page'])));
+
+    $request_url = add_query_arg(array(
+        'per_page' => $per_page,
+        'orderby'  => 'date',
+        'order'    => 'desc',
+        '_embed'   => true,
+    ), rest_url('wp/v2/event'));
+
+    ob_start();
+    ?>
+    <div class="events-container" 
+         data-instance="<?php echo esc_attr($instance); ?>" 
+         data-endpoint="<?php echo esc_attr($request_url); ?>"
+         style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <h2 style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;">Upcoming Events</h2>
+        <div class="events-list" style="min-height:400px;">
+            <div style="padding:40px;text-align:center;color:#64748b;">Loading events...</div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('events', 'events_shortcode');
+
+// =========================
+// Tourism Shortcode - Fetches from /wp-json/wp/v2/tourism_item (New)
+// =========================
+
+function tourism_feed_script() {
+    wp_enqueue_script(
+        'tourism-feed-js',
+        get_template_directory_uri() . '/js/tourism-feed.js',
+        array(),
+        '1.0',
+        true
+    );
+}
+
+add_action('wp_enqueue_scripts', 'tourism_feed_script');
+
+function tourism_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 8,
+    ), $atts, 'tourism');
+
+    $per_page = max(1, min(12, intval($atts['per_page'])));
+
+    $request_url = add_query_arg(array(
+        'per_page' => $per_page,
+        'orderby'  => 'date',
+        'order'    => 'desc',
+        '_embed'   => true,
+    ), rest_url('wp/v2/tourism_item'));
+
+    ob_start();
+    ?>
+    <div class="tourism-container" 
+         data-instance="<?php echo esc_attr($instance); ?>" 
+         data-endpoint="<?php echo esc_attr($request_url); ?>"
+         style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:32px;width:100%;box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+        <h2 style="margin:0 0 32px;color:#163447;font-size:36px;font-weight:700;text-align:center;">Tourism Attractions</h2>
+        <div class="tourism-list" style="min-height:500px;">
+            <div style="padding:60px;text-align:center;color:#64748b;font-size:18px;">Loading attractions...</div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('tourism', 'tourism_shortcode');
+
+// =========================
+// Gallery Shortcode - Fetches CPT with images (e.g. /wp/v2/gallery_item or photo)
+// =========================
+
+function gallery_feed_script() {
+    wp_enqueue_script(
+        'gallery-feed-js',
+        get_template_directory_uri() . '/js/gallery-feed.js',
+        array(),
+        '1.0',
+        true
+    );
+}
+
+add_action('wp_enqueue_scripts', 'gallery_feed_script');
+
+function gallery_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 12,
+        'cpt' => 'gallery_item', // Flexible CPT
+    ), $atts, 'gallery');
+
+    $per_page = max(1, min(24, intval($atts['per_page'])));
+    $cpt = sanitize_text_field($atts['cpt']);
+
+    $request_url = add_query_arg(array(
+        'per_page' => $per_page,
+        'orderby'  => 'date',
+        'order'    => 'desc',
+        '_embed'   => true,
+    ), rest_url("wp/v2/{$cpt}"));
+
+    ob_start();
+    ?>
+    <div class="gallery-container" 
+         data-instance="<?php echo esc_attr($instance); ?>" 
+         data-endpoint="<?php echo esc_attr($request_url); ?>"
+         style="background:#f8fafc;border-radius:16px;padding:40px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+        <h2 style="margin:0 0 40px;color:#163447;font-size:40px;font-weight:700;text-align:center;">Photo Gallery</h2>
+        <div class="gallery-grid" style="display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));min-height:600px;">
+            <div style="padding:80px;text-align:center;grid-column:1/-1;color:#94a3b8;font-size:18px;">Loading gallery images...</div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('gallery', 'gallery_shortcode');
+
+
+
+// =========================
 // Beneficiaries Shortcode - Fetches from /wp-json/wp/v2/beneficiary_item
 // =========================
 function beneficiary_shortcode($atts) {
@@ -1425,3 +1576,4 @@ add_shortcode('beneficiaries', 'beneficiary_shortcode');
 // =========================
 
 // 
+
