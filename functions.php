@@ -2,80 +2,110 @@
 // =========================
 // News Shortcode - Fetches from /wp-json/wp/v2/news_item
 // =========================
-function news_shortcode($atts) {
-    static $instance = 0;
-    $instance++;
 
-    $atts = shortcode_atts(array(
-        'per_page' => 6,
-    ), $atts, 'news');
 
-    $per_page = max(1, min(12, intval($atts['per_page'])));
-
-    $request_url = add_query_arg(array(
-        'per_page' => $per_page,
-        'orderby'  => 'date',
-        'order'    => 'desc',
-        '_embed'   => true, // For featured image if needed
-    ), rest_url('wp/v2/news_item'));
-
-    $response = wp_remote_get($request_url, array(
-        'timeout' => 15,
-        'headers' => array(
-            'Accept' => 'application/json',
-        ),
-    ));
-
-    if (is_wp_error($response)) {
-        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#fff7f7;color:#9b1c1c;">Unable to load news right now.</div>';
-    }
-
-    $status_code = wp_remote_retrieve_response_code($response);
-    $news_items = json_decode(wp_remote_retrieve_body($response), true);
-
-    if (200 !== $status_code || !is_array($news_items) || empty($news_items)) {
-        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;">No news items found.</div>';
-    }
-
-    ob_start();
-    ?>
-    <div class="news-container-<?php echo esc_attr($instance); ?>" style="padding:20px 0;">
-        <h2 style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;">Latest News</h2>
-        <div style="display:grid;gap:20px;">
-            <?php foreach ($news_items as $item) : ?>
-                <?php
-                $title = isset($item['title']['rendered']) ? wp_strip_all_tags($item['title']['rendered']) : 'Untitled';
-                $excerpt = isset($item['excerpt']['rendered']) ? wp_strip_all_tags($item['excerpt']['rendered']) : '';
-                $date = !empty($item['date']) ? mysql2date('F j, Y', $item['date']) : '';
-                $link = !empty($item['link']) ? $item['link'] : '';
-                $featured_image = '';
-                if (isset($item['_embedded']['wp:featuredmedia'][0])) {
-                    $image = $item['_embedded']['wp:featuredmedia'][0];
-                    $featured_image = isset($image['media_details']['sizes']['medium']['source_url']) ? $image['media_details']['sizes']['medium']['source_url'] : (isset($image['source_url']) ? $image['source_url'] : '');
-                }
-                ?>
-                <article style="border:1px solid #dbe4ea;border-radius:12px;padding:24px;background:#f9fbfd;display:flex;gap:20px;">
-                    <?php if ($featured_image) : ?>
-                        <div style="flex:0 0 120px;">
-                            <img src="<?php echo esc_url($featured_image); ?>" alt="<?php echo esc_attr($title); ?>" style="width:100%;height:100px;object-fit:cover;border-radius:8px;">
-                        </div>
-                    <?php endif; ?>
-                    <div style="flex:1;">
-                        <h3 style="margin:0 0 12px;font-size:20px;line-height:1.4;color:#163447;">
-                            <a href="<?php echo esc_url($link); ?>" style="text-decoration:none;color:#163447;"><?php echo esc_html($title); ?></a>
-                        </h3>
-                        <div style="color:#5b6b79;font-size:14px;margin-bottom:12px;"><?php echo esc_html($date); ?></div>
-                        <div style="color:#555;line-height:1.6;margin-bottom:16px;font-size:15px;"><?php echo esc_html(wp_trim_words($excerpt, 25)); ?></div>
-                        <a href="<?php echo esc_url($link); ?>" style="color:#0b3440;text-decoration:none;font-weight:600;font-size:14px;">Read More →</a>
-                    </div>
-                </article>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php
-    return ob_get_clean();
+function news_feed_script() {
+    wp_enqueue_script(
+        'news-feed-js',
+        get_template_directory_uri() . '/js/news-feed.js',
+        array(),
+        null,
+        true
+    );
 }
-add_shortcode('news', 'news_shortcode');
+
+add_action('wp_enqueue_scripts', 'news_feed_script');
+
+    function news_shortcode($atts) {
+        static $instance = 0;
+        $instance++;
+
+        $atts = shortcode_atts(array(
+            'per_page' => 6,
+        ), $atts, 'news');
+
+        $per_page = max(1, min(12, intval($atts['per_page'])));
+
+        $request_url = add_query_arg(array(
+            'per_page' => $per_page,
+            'orderby'  => 'date',
+            'order'    => 'desc',
+            '_embed'   => true, // For featured image if needed
+        ), rest_url('wp/v2/news_item'));
+
+        $response = wp_remote_get($request_url, array(
+            'timeout' => 15,
+            'headers' => array(
+                'Accept' => 'application/json',
+            ),
+        ));
+
+        if (is_wp_error($response)) {
+            return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#fff7f7;color:#9b1c1c;">Unable to load news right now.</div>';
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+        $news_items = json_decode(wp_remote_retrieve_body($response), true);
+
+        if (200 !== $status_code || !is_array($news_items) || empty($news_items)) {
+            return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;">No news items found.</div>';
+        }
+
+        ob_start();
+        ?>
+        
+        <div class="news-container data-news-container-<?php echo esc_attr($instance); ?>" 
+        data-instance="<?php echo esc_attr($instance); ?>" data-endpoint="<?php echo esc_attr($request_url); ?>"
+        style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+</xai:function_call.
+
+
+
+
+
+<xai:function_call name="edit_file">
+<parameter name="path">
+
+            <h2>Latest News</h2>
+            <div class="news-list" style="display:grid;gap:20px;">
+                <?php foreach ($news_items as $item) : ?>
+                    <?php
+                    $title = isset($item['title']['rendered']) ? wp_strip_all_tags($item['title']['rendered']) : 'Untitled';
+                    $excerpt = isset($item['excerpt']['rendered']) ? wp_strip_all_tags($item['excerpt']['rendered']) : '';
+                    $date = !empty($item['date']) ? mysql2date('F j, Y', $item['date']) : '';
+                    $link = !empty($item['link']) ? $item['link'] : '';
+                    $featured_image = '';
+                    if (isset($item['_embedded']['wp:featuredmedia'][0])) {
+                        $image = $item['_embedded']['wp:featuredmedia'][0];
+                        $featured_image = isset($image['media_details']['sizes']['medium']['source_url']) ? $image['media_details']['sizes']['medium']['source_url'] : (isset($image['source_url']) ? $image['source_url'] : '');
+                    }
+                    ?>
+                    <article style="border:1px solid #dbe4ea;border-radius:12px;padding:24px;background:#f9fbfd;display:flex;gap:20px;">
+                        <?php if ($featured_image) : ?>
+                            <div style="flex:0 0 120px;">
+                                <img src="<?php echo esc_url($featured_image); ?>" alt="<?php echo esc_attr($title); ?>" style="width:100%;height:100px;object-fit:cover;border-radius:8px;">
+                            </div>
+                        <?php endif; ?>
+                        <div style="flex:1;">
+                            <h3 style="margin:0 0 12px;font-size:20px;line-height:1.4;color:#163447;">
+                                <a href="<?php echo esc_url($link); ?>" style="text-decoration:none;color:#163447;"><?php echo esc_html($title); ?></a>
+                            </h3>
+                            <div style="display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:start;color:#5b6b79;font-size:14px;margin-bottom:12px;">
+                                <div style="font-weight:600;min-width:60px;">📅</div>
+                                <div><?php echo esc_html($date); ?></div>
+                            </div>
+                            <div style="color:#555;line-height:1.6;margin-bottom:16px;font-size:15px;"><?php echo esc_html(wp_trim_words($excerpt, 25)); ?></div>
+                            <a href="<?php echo esc_url($link); ?>" style="color:#0b3440;text-decoration:none;font-weight:600;font-size:14px;">Read More →</a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <?php
+        return ob_get_clean();
+    }
+    add_shortcode('news', 'news_shortcode');
 
 // =========================
 // BAC Shortcode - Fetches from /wp-json/wp/v2/bac (Bids and Awards Committee)
@@ -118,7 +148,7 @@ function bac_shortcode($atts) {
     ob_start();
     ?>
     <div class="bac-container-<?php echo esc_attr($instance); ?>" style="padding:20px 0;">
-        <h2 style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;">Bids & Awards Committee</h2>
+style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;font-family:Georgia,serif;">Bids & Awards Committee</h2>
         <div style="display:grid;gap:20px;">
             <?php foreach ($bac_items as $item) : ?>
                 <?php
@@ -142,7 +172,10 @@ function bac_shortcode($atts) {
                         <h3 style="margin:0 0 12px;font-size:20px;line-height:1.4;color:#163447;">
                             <a href="<?php echo esc_url($link); ?>" style="text-decoration:none;color:#163447;"><?php echo esc_html($title); ?></a>
                         </h3>
-                        <div style="color:#5b6b79;font-size:14px;margin-bottom:12px;"><?php echo esc_html($date); ?></div>
+                        <div style="display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:start;color:#5b6b79;font-size:14px;margin-bottom:12px;">
+                                <div style="font-weight:600;min-width:60px;">📅</div>
+                                <div><?php echo esc_html($date); ?></div>
+                            </div>
                         <div style="color:#555;line-height:1.6;margin-bottom:16px;font-size:15px;"><?php echo esc_html(wp_trim_words($excerpt, 25)); ?></div>
                         <a href="<?php echo esc_url($link); ?>" style="color:#0b3440;text-decoration:none;font-weight:600;font-size:14px;">View Details →</a>
                     </div>
@@ -156,19 +189,169 @@ function bac_shortcode($atts) {
 add_shortcode('bac', 'bac_shortcode');
 
 // =========================
-//
+// Calendar Shortcode - Inherit from default [calendar] shortcode but with custom styling
 // =========================
-function inherit_wp_calendar_shortcode() {
-    // We pass 'false' to the second parameter so it returns the string instead of echoing
-    $calendar = get_calendar(true, false); 
-    
-    if (empty($calendar)) {
-        // Fallback so the shortcode isn't "invisible" when there are no posts
-        return '<div class="my-custom-styled-calendar"><p>No posts found for this month.</p></div>';
+function holiday_calendar_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'year' => date('Y'),
+        'month' => date('n'),
+    ), $atts, 'wp_calendar');
+
+    $year = intval($atts['year']);
+    $month = intval($atts['month']) - 1; // JS 0-index
+
+    $cache_key = 'ph_holidays_' . $year;
+    $holidays = get_transient($cache_key);
+
+    if ($holidays === false) {
+        $url = 'https://tallyfy.com/national-holidays/api/PH/' . $year . '.json';
+        $response = wp_remote_get($url, array(
+            'timeout' => 15,
+            'headers' => array('Accept' => 'application/json')
+        ));
+
+        if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+            $body = wp_remote_retrieve_body($response);
+            $holidays = json_decode($body, true) ?: array();
+            set_transient($cache_key, $holidays, DAY_IN_SECONDS);
+        } else {
+            $holidays = array();
+        }
     }
-    
-    return '<div class="my-custom-styled-calendar">' .$calendar.'</div>';
+
+    // Render static grid
+    $date = new DateTime("$year-$month-01");
+    $daysInMonth = (int) $date->format('t');
+    $firstDay = (int) $date->format('w'); // 0=Sun
+    $startPad = $firstDay === 0 ? 7 : $firstDay; // Pad Sun-Sat
+
+    $today = new DateTime();
+$isTodayDay = ($year == $today->format('Y') && ($month + 1) == $today->format('n')) ? (int)$today->format('j') : 0;
+    $monthName = $date->format('F Y');
+
+    ob_start();
+    ?>
+    <div class="my-custom-styled-calendar" style="max-width:380px;margin:0 auto;padding:20px;background:#f8f8f8;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.08);font-family:inherit;">
+        <div style="margin-bottom:18px;text-align:center;">
+            <h3 style="margin:0;font-size:28px;font-weight:700;color:#1f2937;"><?php echo $monthName; ?></h3>
+        </div>
+        <table id="static-cal-<?php echo $instance; ?>" style="width:100%;border-collapse:separate;border-spacing:8px;text-align:center;">
+            <thead>
+                <tr>
+                    <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Sun</th>
+                    <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Mon</th>
+                    <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Tue</th>
+                    <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Wed</th>
+                    <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Thu</th>
+                    <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Fri</th>
+                    <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Sat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $day = 1;
+
+                // IMPORTANT: track weekday position (0–6)
+                $weekday = 0;
+
+                // total 6 weeks max (calendar standard)
+                for ($row = 0; $row < 6; $row++) {
+
+                    echo "<tr>";
+
+                    for ($col = 0; $col < 7; $col++) {
+
+                        // FIRST ROW: apply start padding
+                        if ($row == 0 && $col < $startPad) {
+                            echo "<td></td>";
+                            continue;
+                        }
+
+                        // stop if month is done
+                        if ($day > $daysInMonth) {
+                            echo "<td></td>";
+                            continue;
+                        }
+
+                        // reset weekday tracking
+                        $weekday = $col;
+
+                        // ---- HOLIDAY CHECK (OPTIMIZED) ----
+                        $isHoliday = false;
+                        foreach ($holidays as $h) {
+                            if (($h['day'] ?? null) == $day &&
+                                ($h['month'] ?? null) == ($month + 1) &&
+                                ($h['year'] ?? null) == $year) {
+                                $isHoliday = true;
+                                break;
+                            }
+                        }
+
+                        // ---- TODAY CHECK ----
+                        $isTodayHighlight = ($isTodayDay > 0 && $day == $isTodayDay);
+
+                        // ---- STYLING ----
+                        $bg = $isHoliday ? '#fef2f2' : ($isTodayHighlight ? '#eab308' : 'transparent');
+                        $color = $isHoliday ? '#dc2626' : ($isTodayHighlight ? '#111827' : '#374151');
+                        $weight = ($isHoliday || $isTodayHighlight) ? '700' : '500';
+
+                        echo "
+                        <td style='
+                            width:38px;
+                            height:38px;
+                            padding:0;
+                            vertical-align:middle;
+                            font-size:16px;
+                            font-weight:$weight;
+                            color:$color;
+                            background:$bg;
+                            border-radius:8px;
+                        '>
+                            $day
+                        </td>";
+
+                        $day++;
+
+                        // break row early if week ends AND month continues
+                        if ($col == 6) {
+                            // end of week row
+                        }
+                    }
+
+                    echo "</tr>";
+
+                    if ($day > $daysInMonth) {
+                        break;
+                    }
+                }
+                ?>
+                </tbody>
+        </table>
+    </div>
+    <?php
+    return ob_get_clean();
 }
+
+
+
+function inherit_wp_calendar_shortcode() {
+    return holiday_calendar_shortcode(func_get_args()[0]);
+}
+add_action('wp_enqueue_scripts', 'calendar_script');
+
+function calendar_script() {
+    wp_enqueue_script(
+        'holiday-calendar',
+        get_template_directory_uri() . '/js/calendar.js',
+        array(),
+        '1.0',
+        true
+    );
+}
+
 // Ensure this tag matches what you type in WordPress: [wp_calendar]
 add_shortcode('wp_calendar', 'inherit_wp_calendar_shortcode');
 
@@ -272,6 +455,7 @@ function camaligan_weather_shortcode() {
                 line-height:1.2;
                 font-weight:700;
                 color:#163447;
+                font-family:Georgia,serif;
             ">Weather Forecast</h2>
 
             <?php if (!empty($weather_data['current']) && !empty($weather_data['daily'])) : ?>
@@ -399,6 +583,7 @@ function custom_live_time_shortcode($atts) {
 
     $atts = shortcode_atts(array(
         'timezone' => 'Asia/Manila',
+        'format' => '12h',
         'title_color' => '#ffffff',
         'date_color' => '#d4af0d',
         'bg_color' => '#0b3440',
@@ -407,7 +592,7 @@ function custom_live_time_shortcode($atts) {
     ob_start();
     ?>
 
-    <div style="display:flex;justify-content:center;margin:20px 0;">
+    <div class="live-time-container" data-live-time data-instance="<?php echo esc_attr($instance); ?>" data-timezone="<?php echo esc_attr($atts['timezone']); ?>" data-format="<?php echo esc_attr($atts['format']); ?>" style="display:flex;justify-content:center;margin:20px 0;">
         <div id="live-time-card-<?php echo esc_attr($instance); ?>" style="
             width:100%;
             max-width:620px;
@@ -465,43 +650,20 @@ function custom_live_time_shortcode($atts) {
         </div>
     </div>
 
-    <script>
-    (function() {
-        var timeEl = document.getElementById("live-time-<?php echo $instance; ?>");
-        var dateEl = document.getElementById("live-date-<?php echo $instance; ?>");
-        var timeZone = <?php echo wp_json_encode($atts['timezone']); ?>;
-
-        function updateClock() {
-            var now = new Date();
-
-            var timeText = now.toLocaleTimeString("en-US", {
-                timeZone: timeZone,
-                hour: "numeric",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true
-            });
-
-            var dateText = now.toLocaleDateString("en-US", {
-                timeZone: timeZone,
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric"
-            });
-
-            timeEl.textContent = timeText;
-            dateEl.textContent = dateText;
-        }
-
-        updateClock();
-        setInterval(updateClock, 1000);
-    })();
-    </script>
-
     <?php
     return ob_get_clean();
 }
+
+function live_time_script() {
+    wp_enqueue_script(
+        'live-time-js',
+        get_template_directory_uri() . '/js/live-time.js',
+        array(),
+        '1.0',
+        true
+    );
+}
+add_action('wp_enqueue_scripts', 'live_time_script');
 
 
 // =========================
@@ -1008,14 +1170,15 @@ function latest_annual_reports_shortcode($atts) {
 
     ob_start();
     ?>
-    <div class="annual-reports-container-<?php echo esc_attr($instance); ?>" style="padding:20px 0;">
+<div class="annual-reports-container-<?php echo esc_attr($instance); ?>" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:32px;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
         <?php if (!empty($heading)) : ?>
             <h2 style="margin:0 0 18px;color:#163447;font-size:28px;font-weight:700;">
                 <?php echo esc_html($heading); ?>
             </h2>
         <?php endif; ?>
+        Latest annual reports published by the local government unit (LGU). Click on the buttons to view or download the full reports.
 
-        <div style="display:grid;gap:16px;">
+        <div style="display:grid;gap:16px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
             <?php foreach ($reports as $report) : ?>
                 <?php
                 $post_id   = isset($report['id']) ? intval($report['id']) : 0;
@@ -1026,31 +1189,36 @@ function latest_annual_reports_shortcode($atts) {
                 $pdf_url   = $pdf_id ? wp_get_attachment_url($pdf_id) : '';
                 $item_link = $pdf_url ? $pdf_url : (!empty($report['link']) ? $report['link'] : '');
                 ?>
-                <article style="border:1px solid #dbe4ea;border-radius:10px;padding:20px;background:#f8fbfd;">
-                    <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-                        <div style="flex:1 1 260px;">
-                            <h3 style="margin:0 0 10px;font-size:20px;line-height:1.35;color:#163447;">
+                <div style="border-bottom:1px solid #f1f5f9;padding:20px 0; box-shadow: 5px 5px ##E0E0E0;">
+                    <div style="display:flex;flex-direction:row;gap:8px; justify-content: space-between;">
+                        <div>
+                            <h3 style="margin:0;font-size:20px;line-height:1.35;color:#163447;">
                                 <?php echo esc_html($title); ?>
                             </h3>
                             <div style="display:flex;gap:12px;flex-wrap:wrap;color:#5b6b79;font-size:14px;">
                                 <?php if (!empty($year)) : ?>
-                                    <span><?php echo esc_html('Year: ' . $year); ?></span>
+                                    <span>Year: <?php echo esc_html($year); ?></span>
                                 <?php endif; ?>
                                 <?php if (!empty($date)) : ?>
                                     <span><?php echo esc_html($date); ?></span>
                                 <?php endif; ?>
                             </div>
                         </div>
-
+                        
                         <?php if (!empty($item_link)) : ?>
-                            <div style="flex:0 0 auto;">
-                                <a href="<?php echo esc_url($item_link); ?>" <?php echo $pdf_url ? 'download' : ''; ?> style="display:inline-block;padding:11px 18px;background:#0b3440;color:#ffffff;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px;">
-                                    <?php echo esc_html($pdf_url ? 'Download PDF' : 'View Report'); ?>
+                            <div>
+                                <a href="<?php echo esc_url($item_link); ?>" <?php echo $pdf_url ? 'download' : ''; ?> style="display:inline-block;padding:10px 16px;background:#0b3440;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">
+                                    <?php if ($pdf_url) : 
+                                        $filename = basename($pdf_url);
+                                        echo esc_html($filename);
+                                    else : ?>
+                                        View Report
+                                    <?php endif; ?>
                                 </a>
                             </div>
                         <?php endif; ?>
                     </div>
-                </article>
+                </div>
             <?php endforeach; ?>
         </div>
     </div>
@@ -1118,15 +1286,15 @@ function budget_overview_shortcode($atts) {
 
         <div style="overflow-x:auto;">
             <table style="width:100%;border-collapse:collapse;min-width:520px;">
-                <thead>
+                <thead style="font-size: 18px; font-style: bold; border-bottom: 2px solid #e2e8f0;">
                     <tr>
-                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-size:14px;font-weight:700;">Year</th>
-                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-size:14px;font-weight:700;">Ordinance No.</th>
-                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-size:14px;font-weight:700;">Total Budget</th>
-                        <th style="padding:0 0 10px;text-align:left;color:#111827;font-size:14px;font-weight:700;">Download</th>
+                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-weight:700;">Year</th>
+                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-weight:700;">Ordinance No.</th>
+                        <th style="padding:0 14px 10px 0;text-align:left;color:#111827;font-weight:700;">Total Budget</th>
+                        <th style="padding:0 0 10px;text-align:left;color:#111827;font-weight:700;">Download</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody style="font-family: soegoe;">
                     <?php foreach ($budgets as $budget) : ?>
                         <?php
                         $post_id       = isset($budget['id']) ? intval($budget['id']) : 0;
@@ -1138,7 +1306,7 @@ function budget_overview_shortcode($atts) {
                         $fallback_link = !empty($budget['link']) ? $budget['link'] : '';
                         $download_link = $pdf_url ? $pdf_url : $fallback_link;
                         ?>
-                        <tr>
+                        <tr style="height: 30px;">
                             <td style="padding:0 14px 12px 0;color:#1f2937;font-size:14px;vertical-align:top;">
                                 <?php echo esc_html($year ?: 'N/A'); ?>
                             </td>
@@ -1146,9 +1314,9 @@ function budget_overview_shortcode($atts) {
                                 <?php echo esc_html($ordinance_no ?: 'N/A'); ?>
                             </td>
                             <td style="padding:0 14px 12px 0;color:#1f2937;font-size:14px;vertical-align:top;">
-                                <?php echo esc_html($total_budget ?: 'N/A'); ?>
+                                <?php echo '₱ ' . esc_html($total_budget ?: 'N/A'); ?>
                             </td>
-                            <td style="padding:0 0 12px;color:#1f2937;font-size:14px;vertical-align:top;">
+                            <td style="padding:0 0 12px;color:#1f2937;vertical-align:top;">
                                 <?php if (!empty($download_link)) : ?>
                                     <a href="<?php echo esc_url($download_link); ?>" <?php echo $pdf_url ? 'download' : ''; ?> style="color:#6b8fe8;text-decoration:underline;">
                                         View PDF
@@ -1168,6 +1336,7 @@ function budget_overview_shortcode($atts) {
     return ob_get_clean();
 }
 
+
 // Register shortcode
 add_shortcode('ordinances', 'ordinances_shortcode');
 add_shortcode('latest_annual_reports', 'latest_annual_reports_shortcode');
@@ -1178,4 +1347,89 @@ add_shortcode('camaligan_weather', 'camaligan_weather_shortcode');
 add_shortcode('live_time_card', 'custom_live_time_shortcode');
 
 // =========================
+// Beneficiaries Shortcode - Fetches from /wp-json/wp/v2/beneficiary_item
+// =========================
+function beneficiary_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 6,
+    ), $atts, 'beneficiaries');
+
+    $per_page = max(1, min(12, intval($atts['per_page'])));
+
+    $request_url = add_query_arg(array(
+        'per_page' => $per_page,
+        'orderby'  => 'date',
+        'order'    => 'desc',
+        '_embed'   => true,
+    ), rest_url('wp/v2/beneficiary_item'));
+
+    $response = wp_remote_get($request_url, array(
+        'timeout' => 15,
+        'headers' => array(
+            'Accept' => 'application/json',
+        ),
+    ));
+
+    if (is_wp_error($response)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#fff7f7;color:#9b1c1c;">Unable to load beneficiaries right now.</div>';
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $beneficiaries = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (200 !== $status_code || !is_array($beneficiaries) || empty($beneficiaries)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;">No beneficiaries found.</div>';
+    }
+
+    ob_start();
+    ?>
+    <div class="beneficiaries-container data-beneficiaries-container-<?php echo esc_attr($instance); ?>" 
+    data-instance="<?php echo esc_attr($instance); ?>" data-endpoint="<?php echo esc_attr($request_url); ?>"
+    style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;width:100%;max-width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <h2 style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;">Beneficiaries</h2>
+        <p>List households, organizations, and sectors that benefit from social welfare, livelihood, and infrastructure programs of the LGU. The tags highlight the type of program and implementing office.</p>
+        <div class="beneficiaries-list" style="display:grid;gap:20px;">
+            <?php foreach ($beneficiaries as $item) : ?>
+                <?php
+                $title = isset($item['title']['rendered']) ? wp_strip_all_tags($item['title']['rendered']) : 'Untitled';
+                $excerpt = isset($item['excerpt']['rendered']) ? wp_strip_all_tags($item['excerpt']['rendered']) : '';
+                $date = !empty($item['date']) ? mysql2date('F j, Y', $item['date']) : '';
+                $link = !empty($item['link']) ? $item['link'] : '';
+                $featured_image = '';
+                if (isset($item['_embedded']['wp:featuredmedia'][0])) {
+                    $image = $item['_embedded']['wp:featuredmedia'][0];
+                    $featured_image = isset($image['media_details']['sizes']['medium']['source_url']) ? $image['media_details']['sizes']['medium']['source_url'] : (isset($image['source_url']) ? $image['source_url'] : '');
+                }
+                ?>
+                <article style="border:1px solid #dbe4ea;border-radius:12px;padding:24px;background:#f9fbfd;display:flex;gap:20px;">
+                    <?php if ($featured_image) : ?>
+                        <div style="flex:0 0 120px;">
+                            <img src="<?php echo esc_url($featured_image); ?>" alt="<?php echo esc_attr($title); ?>" style="width:100%;height:100px;object-fit:cover;border-radius:8px;">
+                        </div>
+                    <?php endif; ?>
+                    <div style="flex:1;">
+                        <h3 style="margin:0 0 12px;font-size:20px;line-height:1.4;color:#163447;">
+                            <a href="<?php echo esc_url($link); ?>" style="text-decoration:none;color:#163447;"><?php echo esc_html($title); ?></a>
+                        </h3>
+                        <div style="display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:start;color:#5b6b79;font-size:14px;margin-bottom:12px;">
+                            <div style="font-weight:600;min-width:60px;">📅</div>
+                            <div><?php echo esc_html($date); ?></div>
+                        </div>
+                        <div style="color:#555;line-height:1.6;margin-bottom:16px;font-size:15px;"><?php echo esc_html(wp_trim_words($excerpt, 25)); ?></div>
+                        <a href="<?php echo esc_url($link); ?>" style="color:#0b3440;text-decoration:none;font-weight:600;font-size:14px;">Read More →</a>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('beneficiaries', 'beneficiary_shortcode');
+
+// =========================
+
 // 
