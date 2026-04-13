@@ -57,6 +57,7 @@ add_action('wp_enqueue_scripts', 'news_feed_script');
         <div class="news-container data-news-container-<?php echo esc_attr($instance); ?>" 
         data-instance="<?php echo esc_attr($instance); ?>" data-endpoint="<?php echo esc_attr($request_url); ?>"
         style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <h2>Latest News</h2>
 </xai:function_call.
 
 
@@ -148,8 +149,9 @@ function bac_shortcode($atts) {
     ob_start();
     ?>
     <div class="bac-container-<?php echo esc_attr($instance); ?>" style="padding:20px 0;">
-style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;font-family:Georgia,serif;">Bids & Awards Committee</h2>
+            <h2 style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;font-family:Georgia,serif;">Bids & Awards Committee</h2>
         <div style="display:grid;gap:20px;">
+
             <?php foreach ($bac_items as $item) : ?>
                 <?php
                 $title = isset($item['title']['rendered']) ? wp_strip_all_tags($item['title']['rendered']) : 'Untitled';
@@ -337,11 +339,6 @@ $isTodayDay = ($year == $today->format('Y') && ($month + 1) == $today->format('n
 
 
 
-function inherit_wp_calendar_shortcode() {
-    return holiday_calendar_shortcode(func_get_args()[0]);
-}
-add_action('wp_enqueue_scripts', 'calendar_script');
-
 function calendar_script() {
     wp_enqueue_script(
         'holiday-calendar',
@@ -351,9 +348,15 @@ function calendar_script() {
         true
     );
 }
+add_action('wp_enqueue_scripts', 'calendar_script');
+
+function inherit_wp_calendar_shortcode($atts) {
+    return holiday_calendar_shortcode($atts);
+}
 
 // Ensure this tag matches what you type in WordPress: [wp_calendar]
 add_shortcode('wp_calendar', 'inherit_wp_calendar_shortcode');
+
 
 // =========================
 // Camaligan Weather Shortcode
@@ -1189,7 +1192,7 @@ function latest_annual_reports_shortcode($atts) {
                 $pdf_url   = $pdf_id ? wp_get_attachment_url($pdf_id) : '';
                 $item_link = $pdf_url ? $pdf_url : (!empty($report['link']) ? $report['link'] : '');
                 ?>
-                <div style="border-bottom:1px solid #f1f5f9;padding:20px 0; box-shadow: 5px 5px ##E0E0E0;">
+                <div style="border-bottom:1px solid #f1f5f9;padding:20px 0; box-shadow: 5px 5px #E0E0E0;">
                     <div style="display:flex;flex-direction:row;gap:8px; justify-content: space-between;">
                         <div>
                             <h3 style="margin:0;font-size:20px;line-height:1.35;color:#163447;">
@@ -1226,6 +1229,7 @@ function latest_annual_reports_shortcode($atts) {
 
     return ob_get_clean();
 }
+
 
 // =========================
 // Budget Overview Shortcode
@@ -1282,18 +1286,17 @@ function budget_overview_shortcode($atts) {
                         <th style="padding:0 0 10px;text-align:left;color:#111827;font-weight:700;">Download</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php foreach ($budgets as $budget) : ?>
-                        <?php
-                        $post_id       = get_the_ID();
-                        $year          = get_post_meta($post_id, 'budget_overview_year', true);
-                        $ordinance_no  = get_post_meta($post_id, 'budget_overview_ordinance_no', true);
-                        $total_budget  = get_post_meta($post_id, 'budget_overview_total_budget', true);
-                        $pdf_id        = absint(get_post_meta($post_id, 'budget_overview_pdf_id', true));
-                        $pdf_url       = $pdf_id ? wp_get_attachment_url($pdf_id) : '';
+    <tbody>
+                    <?php foreach ($budget_query->posts as $budget_post) : 
+                        $post_id = $budget_post->ID;
+                        $year = get_post_meta($post_id, 'budget_overview_year', true);
+                        $ordinance_no = get_post_meta($post_id, 'budget_overview_ordinance_no', true);
+                        $total_budget = get_post_meta($post_id, 'budget_overview_total_budget', true);
+                        $pdf_id = absint(get_post_meta($post_id, 'budget_overview_pdf_id', true));
+                        $pdf_url = $pdf_id ? wp_get_attachment_url($pdf_id) : '';
                         $fallback_link = get_permalink($post_id);
                         $download_link = $pdf_url ? $pdf_url : $fallback_link;
-                        ?>
+                    ?>
                         <tr style="height: 30px;">
                             <td style="padding:0 14px 12px 0;color:#1f2937;font-size:14px;vertical-align:top;">
                                 <?php echo esc_html($year ?: 'N/A'); ?>
@@ -1314,9 +1317,10 @@ function budget_overview_shortcode($atts) {
                                 <?php endif; ?>
                             </td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                     <?php wp_reset_postdata(); ?>
                 </tbody>
+
             </table>
         </div>
     </section>
