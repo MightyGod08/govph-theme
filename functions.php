@@ -1,6 +1,162 @@
 <?php
 // =========================
-// Custom Calendar Shortcode
+// News Shortcode - Fetches from /wp-json/wp/v2/news_item
+// =========================
+function news_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 6,
+    ), $atts, 'news');
+
+    $per_page = max(1, min(12, intval($atts['per_page'])));
+
+    $request_url = add_query_arg(array(
+        'per_page' => $per_page,
+        'orderby'  => 'date',
+        'order'    => 'desc',
+        '_embed'   => true, // For featured image if needed
+    ), rest_url('wp/v2/news_item'));
+
+    $response = wp_remote_get($request_url, array(
+        'timeout' => 15,
+        'headers' => array(
+            'Accept' => 'application/json',
+        ),
+    ));
+
+    if (is_wp_error($response)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#fff7f7;color:#9b1c1c;">Unable to load news right now.</div>';
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $news_items = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (200 !== $status_code || !is_array($news_items) || empty($news_items)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;">No news items found.</div>';
+    }
+
+    ob_start();
+    ?>
+    <div class="news-container-<?php echo esc_attr($instance); ?>" style="padding:20px 0;">
+        <h2 style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;">Latest News</h2>
+        <div style="display:grid;gap:20px;">
+            <?php foreach ($news_items as $item) : ?>
+                <?php
+                $title = isset($item['title']['rendered']) ? wp_strip_all_tags($item['title']['rendered']) : 'Untitled';
+                $excerpt = isset($item['excerpt']['rendered']) ? wp_strip_all_tags($item['excerpt']['rendered']) : '';
+                $date = !empty($item['date']) ? mysql2date('F j, Y', $item['date']) : '';
+                $link = !empty($item['link']) ? $item['link'] : '';
+                $featured_image = '';
+                if (isset($item['_embedded']['wp:featuredmedia'][0])) {
+                    $image = $item['_embedded']['wp:featuredmedia'][0];
+                    $featured_image = isset($image['media_details']['sizes']['medium']['source_url']) ? $image['media_details']['sizes']['medium']['source_url'] : (isset($image['source_url']) ? $image['source_url'] : '');
+                }
+                ?>
+                <article style="border:1px solid #dbe4ea;border-radius:12px;padding:24px;background:#f9fbfd;display:flex;gap:20px;">
+                    <?php if ($featured_image) : ?>
+                        <div style="flex:0 0 120px;">
+                            <img src="<?php echo esc_url($featured_image); ?>" alt="<?php echo esc_attr($title); ?>" style="width:100%;height:100px;object-fit:cover;border-radius:8px;">
+                        </div>
+                    <?php endif; ?>
+                    <div style="flex:1;">
+                        <h3 style="margin:0 0 12px;font-size:20px;line-height:1.4;color:#163447;">
+                            <a href="<?php echo esc_url($link); ?>" style="text-decoration:none;color:#163447;"><?php echo esc_html($title); ?></a>
+                        </h3>
+                        <div style="color:#5b6b79;font-size:14px;margin-bottom:12px;"><?php echo esc_html($date); ?></div>
+                        <div style="color:#555;line-height:1.6;margin-bottom:16px;font-size:15px;"><?php echo esc_html(wp_trim_words($excerpt, 25)); ?></div>
+                        <a href="<?php echo esc_url($link); ?>" style="color:#0b3440;text-decoration:none;font-weight:600;font-size:14px;">Read More →</a>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('news', 'news_shortcode');
+
+// =========================
+// BAC Shortcode - Fetches from /wp-json/wp/v2/bac (Bids and Awards Committee)
+// =========================
+function bac_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 6,
+    ), $atts, 'bac');
+
+    $per_page = max(1, min(12, intval($atts['per_page'])));
+
+    $request_url = add_query_arg(array(
+        'per_page' => $per_page,
+        'orderby'  => 'date',
+        'order'    => 'desc',
+        '_embed'   => true,
+    ), rest_url('wp/v2/bac'));
+
+    $response = wp_remote_get($request_url, array(
+        'timeout' => 15,
+        'headers' => array(
+            'Accept' => 'application/json',
+        ),
+    ));
+
+    if (is_wp_error($response)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#fff7f7;color:#9b1c1c;">Unable to load BAC items right now.</div>';
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    $bac_items = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (200 !== $status_code || !is_array($bac_items) || empty($bac_items)) {
+        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;">No BAC items found.</div>';
+    }
+
+    ob_start();
+    ?>
+    <div class="bac-container-<?php echo esc_attr($instance); ?>" style="padding:20px 0;">
+        <h2 style="margin:0 0 24px;color:#163447;font-size:28px;font-weight:700;">Bids & Awards Committee</h2>
+        <div style="display:grid;gap:20px;">
+            <?php foreach ($bac_items as $item) : ?>
+                <?php
+                $title = isset($item['title']['rendered']) ? wp_strip_all_tags($item['title']['rendered']) : 'Untitled';
+                $excerpt = isset($item['excerpt']['rendered']) ? wp_strip_all_tags($item['excerpt']['rendered']) : '';
+                $date = !empty($item['date']) ? mysql2date('F j, Y', $item['date']) : '';
+                $link = !empty($item['link']) ? $item['link'] : '';
+                $featured_image = '';
+                if (isset($item['_embedded']['wp:featuredmedia'][0])) {
+                    $image = $item['_embedded']['wp:featuredmedia'][0];
+                    $featured_image = isset($image['media_details']['sizes']['medium']['source_url']) ? $image['media_details']['sizes']['medium']['source_url'] : (isset($image['source_url']) ? $image['source_url'] : '');
+                }
+                ?>
+                <article style="border:1px solid #dbe4ea;border-radius:12px;padding:24px;background:#f9fbfd;display:flex;gap:20px;">
+                    <?php if ($featured_image) : ?>
+                        <div style="flex:0 0 120px;">
+                            <img src="<?php echo esc_url($featured_image); ?>" alt="<?php echo esc_attr($title); ?>" style="width:100%;height:100px;object-fit:cover;border-radius:8px;">
+                        </div>
+                    <?php endif; ?>
+                    <div style="flex:1;">
+                        <h3 style="margin:0 0 12px;font-size:20px;line-height:1.4;color:#163447;">
+                            <a href="<?php echo esc_url($link); ?>" style="text-decoration:none;color:#163447;"><?php echo esc_html($title); ?></a>
+                        </h3>
+                        <div style="color:#5b6b79;font-size:14px;margin-bottom:12px;"><?php echo esc_html($date); ?></div>
+                        <div style="color:#555;line-height:1.6;margin-bottom:16px;font-size:15px;"><?php echo esc_html(wp_trim_words($excerpt, 25)); ?></div>
+                        <a href="<?php echo esc_url($link); ?>" style="color:#0b3440;text-decoration:none;font-weight:600;font-size:14px;">View Details →</a>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('bac', 'bac_shortcode');
+
+// =========================
+//
 // =========================
 function inherit_wp_calendar_shortcode() {
     // We pass 'false' to the second parameter so it returns the string instead of echoing
@@ -352,7 +508,7 @@ function custom_live_time_shortcode($atts) {
 // Municipal Ordinances REST API
 // =========================
 function register_ordinances_rest_api() {
-    // Register REST API route for fetching ordinances
+    // Register REST API route for fetching ordinances with category support
     register_rest_route('govph/v1', '/ordinances', array(
         'methods'             => 'GET',
         'callback'            => 'get_ordinances_callback',
@@ -376,7 +532,26 @@ function register_ordinances_rest_api() {
                 },
                 'default'           => '',
             ),
+            'category' => array(
+                'validate_callback' => function($param) {
+                    return is_string($param) || is_numeric($param);
+                },
+                'default'           => '',
+            ),
+            'category_id' => array(
+                'validate_callback' => function($param) {
+                    return is_numeric($param);
+                },
+                'default'           => 0,
+            ),
         ),
+    ));
+
+    // Register REST API route to get all ordinance categories
+    register_rest_route('govph/v1', '/ordinances/categories', array(
+        'methods'             => 'GET',
+        'callback'            => 'get_ordinance_categories_callback',
+        'permission_callback' => '__return_true',
     ));
 
     // Register REST API route for single ordinance
@@ -396,9 +571,11 @@ function register_ordinances_rest_api() {
 add_action('rest_api_init', 'register_ordinances_rest_api');
 
 function get_ordinances_callback(WP_REST_Request $request) {
-    $page     = intval($request->get_param('page'));
-    $per_page = intval($request->get_param('per_page'));
-    $search   = sanitize_text_field($request->get_param('search'));
+    $page        = intval($request->get_param('page'));
+    $per_page    = intval($request->get_param('per_page'));
+    $search      = sanitize_text_field($request->get_param('search'));
+    $category    = sanitize_text_field($request->get_param('category'));
+    $category_id = intval($request->get_param('category_id'));
 
     // Build query arguments
     $args = array(
@@ -415,6 +592,13 @@ function get_ordinances_callback(WP_REST_Request $request) {
         $args['s'] = $search;
     }
 
+    // Add category filtering
+    if (!empty($category)) {
+        $args['category_name'] = $category;
+    } elseif (!empty($category_id) && $category_id > 0) {
+        $args['cat'] = $category_id;
+    }
+
     // Query posts
     $query = new WP_Query($args);
 
@@ -429,6 +613,18 @@ function get_ordinances_callback(WP_REST_Request $request) {
     // Build response data
     $ordinances = array();
     foreach ($query->posts as $post) {
+        $categories = get_the_category($post->ID);
+        $category_list = array();
+        if (!empty($categories)) {
+            foreach ($categories as $cat) {
+                $category_list[] = array(
+                    'id'   => $cat->term_id,
+                    'name' => $cat->name,
+                    'slug' => $cat->slug,
+                );
+            }
+        }
+
         $ordinances[] = array(
             'id'          => $post->ID,
             'title'       => $post->post_title,
@@ -438,6 +634,7 @@ function get_ordinances_callback(WP_REST_Request $request) {
             'date_gmt'    => $post->post_date_gmt,
             'link'        => get_permalink($post->ID),
             'status'      => $post->post_status,
+            'categories'  => $category_list,
         );
     }
 
@@ -448,6 +645,42 @@ function get_ordinances_callback(WP_REST_Request $request) {
         'pages'        => $query->max_num_pages,
         'current_page' => $page,
         'per_page'     => $per_page,
+    ), 200);
+}
+
+/**
+ * Callback to fetch all ordinance categories
+ * 
+ * @return WP_REST_Response
+ */
+function get_ordinance_categories_callback() {
+    $categories = get_categories(array(
+        'hide_empty' => false,
+    ));
+
+    if (empty($categories)) {
+        return new WP_REST_Response(array(
+            'success' => false,
+            'message' => 'No categories found',
+            'data'    => array(),
+        ), 404);
+    }
+
+    $category_list = array();
+    foreach ($categories as $cat) {
+        $category_list[] = array(
+            'id'          => $cat->term_id,
+            'name'        => $cat->name,
+            'slug'        => $cat->slug,
+            'description' => $cat->description,
+            'count'       => $cat->count,
+        );
+    }
+
+    return new WP_REST_Response(array(
+        'success' => true,
+        'data'    => $category_list,
+        'total'   => count($category_list),
     ), 200);
 }
 
@@ -497,12 +730,21 @@ function ordinances_shortcode($atts) {
     $instance++;
 
     $atts = shortcode_atts(array(
-        'per_page' => 10,
-        'search'   => '',
+        'per_page'        => 10,
+        'search'          => '',
+        'category'        => '',
+        'show_categories' => 'true',
     ), $atts, 'ordinances');
 
-    $per_page = intval($atts['per_page']);
-    $search   = sanitize_text_field($atts['search']);
+    $per_page        = intval($atts['per_page']);
+    $search          = sanitize_text_field($atts['search']);
+    $category        = sanitize_text_field($atts['category']);
+    $show_categories = filter_var($atts['show_categories'], FILTER_VALIDATE_BOOLEAN);
+
+    // Get all categories
+    $categories = get_categories(array(
+        'hide_empty' => false,
+    ));
 
     // Build query arguments
     $args = array(
@@ -517,71 +759,208 @@ function ordinances_shortcode($atts) {
         $args['s'] = $search;
     }
 
+    if (!empty($category)) {
+        $args['category_name'] = $category;
+    }
+
     $query = new WP_Query($args);
 
     ob_start();
     ?>
 
     <div class="ordinances-container-<?php echo esc_attr($instance); ?>" style="padding: 20px 0;">
-        <?php if ($query->have_posts()) : ?>
+        <!-- Category Filters -->
+        <?php if ($show_categories && !empty($categories)) : ?>
             <div style="
-                display: grid;
-                gap: 15px;
+                margin-bottom: 30px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: flex-start;
             ">
-                <?php while ($query->have_posts()) : $query->the_post(); ?>
-                    <div style="
-                        border: 1px solid #ddd;
-                        border-radius: 8px;
-                        padding: 20px;
-                        background: #f9f9f9;
-                        transition: box-shadow 0.3s ease;
-                    " onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
-                        <h3 style="
-                            margin: 0 0 10px 0;
-                            font-size: 18px;
-                            color: #163447;
-                        ">
-                            <a href="<?php the_permalink(); ?>" style="text-decoration: none; color: #163447;">
-                                <?php the_title(); ?>
-                            </a>
-                        </h3>
-                        <div style="
-                            color: #666;
-                            font-size: 14px;
-                            margin-bottom: 12px;
-                        ">
-                            <?php echo get_the_date('F j, Y'); ?>
-                        </div>
-                        <div style="
-                            color: #555;
-                            line-height: 1.6;
-                            margin-bottom: 12px;
-                        ">
-                            <?php echo wp_trim_words(get_the_content(), 30); ?>
-                        </div>
-                        <a href="<?php the_permalink(); ?>" style="
-                            color: #0b3440;
-                            text-decoration: none;
+                <button class="ordinance-category-btn-<?php echo esc_attr($instance); ?>" 
+                    data-category="" 
+                    style="
+                        padding: 10px 16px;
+                        border: 1px solid #e0e0e0;
+                        background: <?php echo empty($category) ? '#163447' : '#fff'; ?>;
+                        color: <?php echo empty($category) ? '#fff' : '#163447'; ?>;
+                        border-radius: 6px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-size: 14px;
+                    ">
+                    All
+                </button>
+                <?php foreach ($categories as $cat) : ?>
+                    <button class="ordinance-category-btn-<?php echo esc_attr($instance); ?>" 
+                        data-category="<?php echo esc_attr($cat->slug); ?>"
+                        style="
+                            padding: 10px 16px;
+                            border: 1px solid #e0e0e0;
+                            background: <?php echo $category === $cat->slug ? '#163447' : '#fff'; ?>;
+                            color: <?php echo $category === $cat->slug ? '#fff' : '#163447'; ?>;
+                            border-radius: 6px;
                             font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
                             font-size: 14px;
                         ">
-                            Read More →
-                        </a>
-                    </div>
-                <?php endwhile; ?>
-            </div>
-            <?php wp_reset_postdata(); ?>
-        <?php else : ?>
-            <div style="
-                text-align: center;
-                padding: 40px 20px;
-                color: #999;
-                font-size: 16px;
-            ">
-                No ordinances found.
+                        <?php echo esc_html($cat->name); ?>
+                    </button>
+                <?php endforeach; ?>
             </div>
         <?php endif; ?>
+
+        <!-- Ordinances List -->
+        <div class="ordinances-list-<?php echo esc_attr($instance); ?>">
+            <?php if ($query->have_posts()) : ?>
+                <div style="
+                    display: grid;
+                    gap: 15px;
+                ">
+                    <?php while ($query->have_posts()) : $query->the_post(); ?>
+                        <div style="
+                            border: 1px solid #ddd;
+                            border-radius: 8px;
+                            padding: 20px;
+                            background: #f9f9f9;
+                            transition: box-shadow 0.3s ease;
+                        " onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+                            <h3 style="
+                                margin: 0 0 10px 0;
+                                font-size: 18px;
+                                color: #163447;
+                            ">
+                                <a href="<?php the_permalink(); ?>" style="text-decoration: none; color: #163447;">
+                                    <?php the_title(); ?>
+                                </a>
+                            </h3>
+                            <div style="
+                                color: #666;
+                                font-size: 14px;
+                                margin-bottom: 12px;
+                            ">
+                                <?php echo get_the_date('F j, Y'); ?>
+                            </div>
+                            <?php
+                            $post_categories = get_the_category();
+                            if (!empty($post_categories)) : ?>
+                                <div style="
+                                    display: flex;
+                                    gap: 8px;
+                                    margin-bottom: 12px;
+                                    flex-wrap: wrap;
+                                ">
+                                    <?php foreach ($post_categories as $cat) : ?>
+                                        <span style="
+                                            background: #e8f4f8;
+                                            color: #163447;
+                                            padding: 4px 10px;
+                                            border-radius: 4px;
+                                            font-size: 12px;
+                                            font-weight: 600;
+                                        ">
+                                            <?php echo esc_html($cat->name); ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                            <div style="
+                                color: #555;
+                                line-height: 1.6;
+                                margin-bottom: 12px;
+                            ">
+                                <?php echo wp_trim_words(get_the_content(), 30); ?>
+                            </div>
+                            <a href="<?php the_permalink(); ?>" style="
+                                color: #0b3440;
+                                text-decoration: none;
+                                font-weight: 600;
+                                font-size: 14px;
+                            ">
+                                Read More →
+                            </a>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
+                <?php wp_reset_postdata(); ?>
+            <?php else : ?>
+                <div style="
+                    text-align: center;
+                    padding: 40px 20px;
+                    color: #999;
+                    font-size: 16px;
+                ">
+                    No ordinances found.
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
+
+    <script>
+    (function() {
+        const instance = <?php echo intval($instance); ?>;
+        const btns = document.querySelectorAll('.ordinance-category-btn-' + instance);
+        const container = document.querySelector('.ordinances-container-' + instance);
+
+        btns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                
+                // Update button styles
+                btns.forEach(b => {
+                    b.style.background = '#fff';
+                    b.style.color = '#163447';
+                });
+                this.style.background = '#163447';
+                this.style.color = '#fff';
+
+                // Fetch ordinances by category
+                const url = new URL('<?php echo rest_url('govph/v1/ordinances'); ?>');
+                if (category) {
+                    url.searchParams.append('category', category);
+                }
+
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        const list = container.querySelector('.ordinances-list-' + instance);
+                        if (data.data && data.data.length > 0) {
+                            let html = '<div style="display: grid; gap: 15px;">';
+                            data.data.forEach(post => {
+                                let categoryTags = '';
+                                if (post.categories && post.categories.length > 0) {
+                                    categoryTags = post.categories.map(cat => 
+                                        '<span style="background: #e8f4f8; color: #163447; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">' + cat.name + '</span>'
+                                    ).join('');
+                                    categoryTags = '<div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">' + categoryTags + '</div>';
+                                }
+
+                                html += `
+                                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; background: #f9f9f9; transition: box-shadow 0.3s ease;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+                                        <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #163447;">
+                                            <a href="${post.link}" style="text-decoration: none; color: #163447;">${post.title}</a>
+                                        </h3>
+                                        <div style="color: #666; font-size: 14px; margin-bottom: 12px;">${new Date(post.date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                                        ${categoryTags}
+                                        <div style="color: #555; line-height: 1.6; margin-bottom: 12px;">${post.excerpt}</div>
+                                        <a href="${post.link}" style="color: #0b3440; text-decoration: none; font-weight: 600; font-size: 14px;">Read More →</a>
+                                    </div>
+                                `;
+                            });
+                            html += '</div>';
+                            list.innerHTML = html;
+                        } else {
+                            list.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #999; font-size: 16px;">No ordinances found.</div>';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching ordinances:', error));
+            });
+        });
+    })();
+    </script>
 
     <?php
     return ob_get_clean();
@@ -786,4 +1165,5 @@ add_shortcode('latest_budget_overview', 'budget_overview_shortcode');
 add_shortcode('camaligan_weather', 'camaligan_weather_shortcode');
 add_shortcode('live_time_card', 'custom_live_time_shortcode');
 
-
+// =========================
+// 
