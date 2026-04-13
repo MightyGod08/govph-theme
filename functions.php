@@ -1244,28 +1244,16 @@ function budget_overview_shortcode($atts) {
     $heading  = sanitize_text_field($atts['title']);
     $summary  = sanitize_textarea_field($atts['summary']);
 
-    $request_url = add_query_arg(array(
-        'per_page' => $per_page,
-        'orderby'  => 'date',
-        'order'    => 'desc',
-        '_fields'  => 'id,date,link,title',
-    ), rest_url('wp/v2/budget_overview'));
-
-    $response = wp_remote_get($request_url, array(
-        'timeout' => 15,
-        'headers' => array(
-            'Accept' => 'application/json',
-        ),
+    $budget_query = new WP_Query(array(
+        'post_type'           => 'budget_overview',
+        'post_status'         => 'publish',
+        'posts_per_page'      => $per_page,
+        'orderby'             => 'date',
+        'order'               => 'DESC',
+        'ignore_sticky_posts' => true,
     ));
 
-    if (is_wp_error($response)) {
-        return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#fff7f7;color:#9b1c1c;">Unable to load budget overview right now.</div>';
-    }
-
-    $status_code = wp_remote_retrieve_response_code($response);
-    $budgets     = json_decode(wp_remote_retrieve_body($response), true);
-
-    if (200 !== $status_code || !is_array($budgets) || empty($budgets)) {
+    if (!$budget_query->have_posts()) {
         return '<div style="padding:20px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;color:#64748b;">No budget overview entries found.</div>';
     }
 
@@ -1294,16 +1282,16 @@ function budget_overview_shortcode($atts) {
                         <th style="padding:0 0 10px;text-align:left;color:#111827;font-weight:700;">Download</th>
                     </tr>
                 </thead>
-                <tbody style="font-family: soegoe;">
+                <tbody>
                     <?php foreach ($budgets as $budget) : ?>
                         <?php
-                        $post_id       = isset($budget['id']) ? intval($budget['id']) : 0;
-                        $year          = $post_id ? get_post_meta($post_id, 'budget_overview_year', true) : '';
-                        $ordinance_no  = $post_id ? get_post_meta($post_id, 'budget_overview_ordinance_no', true) : '';
-                        $total_budget  = $post_id ? get_post_meta($post_id, 'budget_overview_total_budget', true) : '';
-                        $pdf_id        = $post_id ? absint(get_post_meta($post_id, 'budget_overview_pdf_id', true)) : 0;
+                        $post_id       = get_the_ID();
+                        $year          = get_post_meta($post_id, 'budget_overview_year', true);
+                        $ordinance_no  = get_post_meta($post_id, 'budget_overview_ordinance_no', true);
+                        $total_budget  = get_post_meta($post_id, 'budget_overview_total_budget', true);
+                        $pdf_id        = absint(get_post_meta($post_id, 'budget_overview_pdf_id', true));
                         $pdf_url       = $pdf_id ? wp_get_attachment_url($pdf_id) : '';
-                        $fallback_link = !empty($budget['link']) ? $budget['link'] : '';
+                        $fallback_link = get_permalink($post_id);
                         $download_link = $pdf_url ? $pdf_url : $fallback_link;
                         ?>
                         <tr style="height: 30px;">
@@ -1326,7 +1314,8 @@ function budget_overview_shortcode($atts) {
                                 <?php endif; ?>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
+                    <?php endwhile; ?>
+                    <?php wp_reset_postdata(); ?>
                 </tbody>
             </table>
         </div>
@@ -1335,7 +1324,6 @@ function budget_overview_shortcode($atts) {
 
     return ob_get_clean();
 }
-
 
 // Register shortcode
 add_shortcode('ordinances', 'ordinances_shortcode');
