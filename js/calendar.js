@@ -86,8 +86,8 @@ function render() {
         const isHoliday = holidays.some(holiday => {
           const hDate = new Date(holiday.date);
           return hDate.getFullYear() === year && 
-                 hDate.getMonth() === month && 
-                 hDate.getDate() === day;
+              hDate.getMonth() === month && 
+              hDate.getDate() === day;
         });
 
         if (isHoliday) {
