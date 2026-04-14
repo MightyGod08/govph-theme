@@ -107,6 +107,149 @@ add_action('wp_enqueue_scripts', 'news_feed_script');
         return ob_get_clean();
     }
     add_shortcode('news', 'news_shortcode');
+// =========================
+// News and Other Updates Shortcodes
+// Uses camaligan-custom-wp-plugin news_item CPT
+// =========================
+function govph_news_updates_query($args = array()) {
+    $defaults = array(
+        'post_type'           => 'news_item',
+        'post_status'         => 'publish',
+        'posts_per_page'      => 1,
+        'orderby'             => 'date',
+        'order'               => 'DESC',
+        'ignore_sticky_posts' => true,
+    );
+
+    $query_args = wp_parse_args($args, $defaults);
+
+    return class_exists('News_Manager')
+        ? News_Manager::get_news($query_args)
+        : new WP_Query($query_args);
+}
+
+function news_and_updates_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'title' => 'News and Updates',
+    ), $atts, 'news_and_updates');
+
+    $heading = sanitize_text_field($atts['title']);
+    $news_query = govph_news_updates_query(array('posts_per_page' => 1));
+
+    if (!$news_query->have_posts()) {
+        return '<div style="padding:18px;border:1px solid #e2e8f0;border-radius:4px;background:#ffffff;color:#64748b;">No news updates found.</div>';
+    }
+
+    ob_start();
+    ?>
+    <section class="news-and-updates-card" style="display:block;width:100%;max-width:100%;box-sizing:border-box;background:#ffffff;border:1px solid #e5e7eb;border-radius:4px;padding:24px 28px 46px;box-shadow:0 2px 8px rgba(15,23,42,0.16);">
+        <?php if (!empty($heading)) : ?>
+            <h2 style="margin:0 0 14px;color:#163447;font-family:Georgia,'Times New Roman',serif;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:0;">
+                <?php echo esc_html($heading); ?>
+            </h2>
+        <?php endif; ?>
+
+        <?php while ($news_query->have_posts()) : $news_query->the_post(); ?>
+            <?php
+            $post_id = get_the_ID();
+            $title = get_the_title($post_id);
+            $link = get_permalink($post_id);
+            $content = has_excerpt($post_id) ? get_the_excerpt($post_id) : get_the_content(null, false, $post_id);
+            $summary = wp_trim_words(wp_strip_all_tags($content), 65, '...');
+            $image_url = get_the_post_thumbnail_url($post_id, 'large');
+            ?>
+            <article style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:32px;align-items:start;width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:0;">
+                <div style="color:#111827;font-size:13px;line-height:1.45;padding-top:4px;min-width:0;">
+                    <a href="<?php echo esc_url($link); ?>" style="display:block;margin:0 0 8px;color:#163447;font-weight:700;text-decoration:none;">
+                        <?php echo esc_html($title); ?>
+                    </a>
+                    <?php echo esc_html($summary); ?>
+                </div>
+
+                <a href="<?php echo esc_url($link); ?>" style="display:block;width:100%;max-width:100%;min-width:0;min-height:210px;background:#d9d9d9;border-radius:4px;overflow:hidden;text-decoration:none;">
+                    <?php if (!empty($image_url)) : ?>
+                        <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr($title); ?>" style="display:block;width:100%;height:210px;object-fit:cover;">
+                    <?php endif; ?>
+                </a>
+            </article>
+        <?php endwhile; ?>
+        <?php wp_reset_postdata(); ?>
+    </section>
+    <?php
+
+    return ob_get_clean();
+}
+
+function other_updates_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'title' => 'Other Updates',
+        'posts_per_page' => 9,
+        'offset' => 1,
+    ), $atts, 'other_updates');
+
+    $heading = sanitize_text_field($atts['title']);
+    $posts_per_page = max(1, min(12, absint($atts['posts_per_page'])));
+    $offset = max(0, absint($atts['offset']));
+    $updates_query = govph_news_updates_query(array(
+        'posts_per_page' => $posts_per_page,
+        'offset' => $offset,
+    ));
+
+    if (!$updates_query->have_posts()) {
+        return '<div style="padding:18px;border:1px solid #e2e8f0;border-radius:4px;background:#ffffff;color:#64748b;">No other updates found.</div>';
+    }
+
+    ob_start();
+    ?>
+    <section class="other-updates-card" style="display:block;width:100%;max-width:100%;box-sizing:border-box;background:#ffffff;border:1px solid #e5e7eb;border-radius:4px;padding:24px 26px 34px;box-shadow:0 2px 8px rgba(15,23,42,0.16);">
+        <?php if (!empty($heading)) : ?>
+            <h2 style="margin:0 0 18px;color:#163447;font-family:Georgia,'Times New Roman',serif;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:0;">
+                <?php echo esc_html($heading); ?>
+            </h2>
+        <?php endif; ?>
+
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 12px;width:100%;max-width:100%;min-width:0;box-sizing:border-box;max-height:760px;overflow-y:auto;padding:0 8px 8px 0;">
+            <?php while ($updates_query->have_posts()) : $updates_query->the_post(); ?>
+                <?php
+                $post_id = get_the_ID();
+                $title = get_the_title($post_id);
+                $link = get_permalink($post_id);
+                $date = get_the_date('F j, Y', $post_id);
+                $content = has_excerpt($post_id) ? get_the_excerpt($post_id) : get_the_content(null, false, $post_id);
+                $summary = wp_trim_words(wp_strip_all_tags($content), 12, '...');
+                $image_url = get_the_post_thumbnail_url($post_id, 'medium_large');
+                ?>
+                <article style="width:100%;max-width:100%;min-width:0;box-sizing:border-box;background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;box-shadow:0 2px 5px rgba(15,23,42,0.18);overflow:hidden;min-height:236px;">
+                    <a href="<?php echo esc_url($link); ?>" style="display:block;width:100%;height:118px;background:#d9d9d9;text-decoration:none;overflow:hidden;">
+                        <?php if (!empty($image_url)) : ?>
+                            <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr($title); ?>" style="display:block;width:100%;height:118px;object-fit:cover;">
+                        <?php endif; ?>
+                    </a>
+                    <div style="padding:12px 12px 14px;">
+                        <h3 style="margin:0 0 7px;color:#163447;font-size:14px;line-height:1.35;font-weight:700;">
+                            <a href="<?php echo esc_url($link); ?>" style="color:#163447;text-decoration:none;">
+                                <?php echo esc_html($title); ?>
+                            </a>
+                        </h3>
+                        <div style="margin:0 0 7px;color:#64748b;font-size:11px;line-height:1.3;">
+                            <?php echo esc_html($date); ?>
+                        </div>
+                        <p style="margin:0;color:#111827;font-size:12px;line-height:1.45;">
+                            <?php echo esc_html($summary); ?>
+                        </p>
+                    </div>
+                </article>
+            <?php endwhile; ?>
+        </div>
+        <?php wp_reset_postdata(); ?>
+    </section>
+    <?php
+
+    return ob_get_clean();
+}
+
+add_shortcode('news_and_updates', 'news_and_updates_shortcode');
+add_shortcode('other_updates', 'other_updates_shortcode');
 
 // =========================
 // BAC Shortcode - Fetches from /wp-json/wp/v2/bac (Bids and Awards Committee)
