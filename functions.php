@@ -1452,7 +1452,7 @@ function gallery_feed_script() {
 
 add_action('wp_enqueue_scripts', 'gallery_feed_script');
 
-function gallery_shortcode($atts) {
+function govph_gallery_shortcode($atts) {
     static $instance = 0;
     $instance++;
 
@@ -1485,7 +1485,7 @@ function gallery_shortcode($atts) {
     <?php
     return ob_get_clean();
 }
-add_shortcode('gallery', 'gallery_shortcode');
+add_shortcode('gallery', 'govph_gallery_shortcode');
 
 
 
