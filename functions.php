@@ -1329,12 +1329,276 @@ function budget_overview_shortcode($atts) {
     return ob_get_clean();
 }
 
+// =========================
+// On-going Projects Shortcode
+// Uses camaligan-custom-wp-plugin project CPT and project_status taxonomy
+// =========================
+function govph_ongoing_projects_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'per_page' => 3,
+        'title'    => 'On-going Projects',
+        'summary'  => 'Track physical and financial progress for current infrastructure projects. Update the sample entries with real progress data and target completion dates.',
+    ), $atts, 'ongoing_projects');
+
+    $per_page = max(1, min(20, intval($atts['per_page'])));
+    $heading  = sanitize_text_field($atts['title']);
+    $summary  = sanitize_textarea_field($atts['summary']);
+
+    $project_args = array(
+        'post_type'           => 'project',
+        'post_status'         => 'publish',
+        'posts_per_page'      => $per_page,
+        'orderby'             => 'date',
+        'order'               => 'DESC',
+        'ignore_sticky_posts' => true,
+        'tax_query'           => array(
+            array(
+                'taxonomy' => 'project_status',
+                'field'    => 'slug',
+                'terms'    => 'ongoing',
+            ),
+        ),
+    );
+
+    $projects_query = class_exists('Project_Manager')
+        ? Project_Manager::get_projects($project_args)
+        : new WP_Query($project_args);
+
+    ob_start();
+    ?>
+    <section class="ongoing-projects-shortcode" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:4px;padding:40px 42px 34px;box-shadow:0 2px 8px rgba(15,23,42,0.16);">
+        <?php if (!empty($heading)) : ?>
+            <h2 style="margin:0 0 12px;color:#163447;font-family:Georgia,'Times New Roman',serif;font-size:31px;line-height:1.2;font-weight:700;letter-spacing:0;">
+                <?php echo esc_html($heading); ?>
+            </h2>
+        <?php endif; ?>
+
+        <?php if (!empty($summary)) : ?>
+            <p style="margin:0 0 14px;color:#111827;font-size:14px;line-height:1.7;max-width:760px;">
+                <?php echo esc_html($summary); ?>
+            </p>
+        <?php endif; ?>
+
+        <?php if ($projects_query->have_posts()) : ?>
+            <div style="border:1px solid #cfd4da;border-bottom:0;border-radius:4px 4px 0 0;overflow:hidden;">
+                <?php while ($projects_query->have_posts()) : $projects_query->the_post(); ?>
+                    <?php
+                    $post_id = get_the_ID();
+                    $completion_percent = absint(get_post_meta($post_id, 'project_completion_percent', true));
+                    $completion_percent = min(100, $completion_percent);
+                    $target_date = get_post_meta($post_id, 'project_target_date', true);
+                    $target_label = 'TBA';
+
+                    if (!empty($target_date)) {
+                        $timestamp = strtotime($target_date);
+                        $target_label = $timestamp ? date_i18n('M Y', $timestamp) : $target_date;
+                    }
+                    ?>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:11px 14px;border-bottom:1px solid #cfd4da;font-size:12px;line-height:1.45;">
+                        <a href="<?php the_permalink(); ?>" style="color:#163447;text-decoration:underline;">
+                            <?php the_title(); ?>
+                        </a>
+                        <span style="color:#111827;white-space:nowrap;">
+                            <?php echo esc_html($completion_percent); ?>% complete &bull; Target: <?php echo esc_html($target_label); ?>
+                        </span>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php else : ?>
+            <div style="padding:14px;border:1px solid #cfd4da;border-radius:4px;color:#64748b;font-size:13px;">
+                No on-going projects found.
+            </div>
+        <?php endif; ?>
+        <?php wp_reset_postdata(); ?>
+    </section>
+    <?php
+
+    return ob_get_clean();
+}
+// =========================
+// Completed Projects Shortcode
+// Uses camaligan-custom-wp-plugin project CPT and project_status taxonomy
+// =========================
+function govph_completed_projects_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'per_page' => 10,
+        'title'    => 'Completed Projects',
+        'summary'  => 'Publish completed road, building, and other infrastructure projects here, including completion dates and acceptance reports.',
+    ), $atts, 'completed_projects');
+
+    $per_page = max(1, min(50, intval($atts['per_page'])));
+    $heading  = sanitize_text_field($atts['title']);
+    $summary  = sanitize_textarea_field($atts['summary']);
+
+    $project_args = array(
+        'post_type'           => 'project',
+        'post_status'         => 'publish',
+        'posts_per_page'      => $per_page,
+        'orderby'             => 'date',
+        'order'               => 'DESC',
+        'ignore_sticky_posts' => true,
+        'tax_query'           => array(
+            array(
+                'taxonomy' => 'project_status',
+                'field'    => 'slug',
+                'terms'    => 'completed',
+            ),
+        ),
+    );
+
+    $projects_query = class_exists('Project_Manager')
+        ? Project_Manager::get_projects($project_args)
+        : new WP_Query($project_args);
+
+    ob_start();
+    ?>
+    <section class="completed-projects-shortcode" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:4px;padding:52px 54px 44px;box-shadow:0 2px 8px rgba(15,23,42,0.16);">
+        <?php if (!empty($heading)) : ?>
+            <h2 style="margin:0 0 18px;color:#163447;font-family:Georgia,'Times New Roman',serif;font-size:40px;line-height:1.15;font-weight:700;letter-spacing:0;">
+                <?php echo esc_html($heading); ?>
+            </h2>
+        <?php endif; ?>
+
+        <?php if (!empty($summary)) : ?>
+            <p style="margin:0 0 20px;color:#111827;font-size:16px;line-height:1.6;max-width:820px;">
+                <?php echo esc_html($summary); ?>
+            </p>
+        <?php endif; ?>
+
+        <?php if ($projects_query->have_posts()) : ?>
+            <div style="border:1px solid #cfd4da;border-bottom:0;border-radius:4px 4px 0 0;overflow:hidden;">
+                <?php while ($projects_query->have_posts()) : $projects_query->the_post(); ?>
+                    <?php
+                    $post_id = get_the_ID();
+                    $completed_date = get_post_meta($post_id, 'project_target_date', true);
+                    $completed_label = 'TBA';
+
+                    if (!empty($completed_date)) {
+                        $timestamp = strtotime($completed_date);
+                        $completed_label = $timestamp ? date_i18n('F Y', $timestamp) : $completed_date;
+                    }
+                    ?>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:15px 18px;border-bottom:1px solid #cfd4da;font-size:14px;line-height:1.45;">
+                        <a href="<?php the_permalink(); ?>" style="color:#163447;text-decoration:underline;">
+                            <?php the_title(); ?>
+                        </a>
+                        <span style="color:#111827;white-space:nowrap;">
+                            Completed: <?php echo esc_html($completed_label); ?>
+                        </span>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php else : ?>
+            <div style="padding:18px;border:1px solid #cfd4da;border-radius:4px;color:#64748b;font-size:14px;">
+                No completed projects found.
+            </div>
+        <?php endif; ?>
+        <?php wp_reset_postdata(); ?>
+    </section>
+    <?php
+
+    return ob_get_clean();
+}
+// =========================
+// Awarded Infrastructure Projects Shortcode
+// Uses camaligan-custom-wp-plugin project CPT and project_status taxonomy
+// =========================
+function govph_awarded_projects_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'per_page' => 10,
+        'title'    => 'Awarded Infrastructure Projects',
+        'summary'  => 'This page can present a table of all awarded infrastructure projects, including contractor, contract amount, and project timeline.',
+    ), $atts, 'awarded_projects');
+
+    $per_page = max(1, min(50, intval($atts['per_page'])));
+    $heading  = sanitize_text_field($atts['title']);
+    $summary  = sanitize_textarea_field($atts['summary']);
+
+    $project_args = array(
+        'post_type'           => 'project',
+        'post_status'         => 'publish',
+        'posts_per_page'      => $per_page,
+        'orderby'             => 'date',
+        'order'               => 'DESC',
+        'ignore_sticky_posts' => true,
+        'tax_query'           => array(
+            array(
+                'taxonomy' => 'project_status',
+                'field'    => 'slug',
+                'terms'    => 'awarded',
+            ),
+        ),
+    );
+
+    $projects_query = class_exists('Project_Manager')
+        ? Project_Manager::get_projects($project_args)
+        : new WP_Query($project_args);
+
+    ob_start();
+    ?>
+    <section class="awarded-projects-shortcode" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:4px;padding:52px 54px 44px;box-shadow:0 2px 8px rgba(15,23,42,0.16);">
+        <?php if (!empty($heading)) : ?>
+            <h2 style="margin:0 0 18px;color:#163447;font-family:Georgia,'Times New Roman',serif;font-size:40px;line-height:1.15;font-weight:700;letter-spacing:0;">
+                <?php echo esc_html($heading); ?>
+            </h2>
+        <?php endif; ?>
+
+        <?php if (!empty($summary)) : ?>
+            <p style="margin:0 0 20px;color:#111827;font-size:16px;line-height:1.6;max-width:860px;">
+                <?php echo esc_html($summary); ?>
+            </p>
+        <?php endif; ?>
+
+        <?php if ($projects_query->have_posts()) : ?>
+            <div style="border:1px solid #cfd4da;border-bottom:0;border-radius:4px 4px 0 0;overflow:hidden;">
+                <?php while ($projects_query->have_posts()) : $projects_query->the_post(); ?>
+                    <?php
+                    $post_id = get_the_ID();
+                    $timeline = get_post_meta($post_id, 'project_timeline', true);
+                    $contractor = get_post_meta($post_id, 'project_contractor', true);
+                    $contract_amount = get_post_meta($post_id, 'project_contract_amount', true);
+                    $detail_label = !empty($timeline) ? $timeline : 'TBA';
+
+                    if (!empty($contractor)) {
+                        $detail_label .= ' | ' . $contractor;
+                    }
+
+                    if (!empty($contract_amount)) {
+                        $detail_label .= ' | ' . $contract_amount;
+                    }
+                    ?>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:15px 18px;border-bottom:1px solid #cfd4da;font-size:14px;line-height:1.45;">
+                        <a href="<?php the_permalink(); ?>" style="color:#163447;text-decoration:underline;">
+                            <?php the_title(); ?>
+                        </a>
+                        <span style="color:#111827;white-space:nowrap;">
+                            Contract Awarded: <?php echo esc_html($detail_label); ?>
+                        </span>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php else : ?>
+            <div style="padding:18px;border:1px solid #cfd4da;border-radius:4px;color:#64748b;font-size:14px;">
+                No awarded infrastructure projects found.
+            </div>
+        <?php endif; ?>
+        <?php wp_reset_postdata(); ?>
+    </section>
+    <?php
+
+    return ob_get_clean();
+}
 // Register shortcode
 add_shortcode('ordinances', 'ordinances_shortcode');
 add_shortcode('latest_annual_reports', 'latest_annual_reports_shortcode');
 add_shortcode('annual_reports', 'latest_annual_reports_shortcode');
 add_shortcode('budget_overview', 'budget_overview_shortcode');
 add_shortcode('latest_budget_overview', 'budget_overview_shortcode');
+add_shortcode('ongoing_projects', 'govph_ongoing_projects_shortcode');
+add_shortcode('on_going_projects', 'govph_ongoing_projects_shortcode');
+add_shortcode('completed_projects', 'govph_completed_projects_shortcode');
+add_shortcode('awarded_projects', 'govph_awarded_projects_shortcode');
+add_shortcode('awarded_infrastructure_projects', 'govph_awarded_projects_shortcode');
 add_shortcode('camaligan_weather', 'camaligan_weather_shortcode');
 add_shortcode('live_time_card', 'custom_live_time_shortcode');
 
@@ -1452,7 +1716,7 @@ function gallery_feed_script() {
 
 add_action('wp_enqueue_scripts', 'gallery_feed_script');
 
-function gallery_shortcode($atts) {
+function govph_gallery_shortcode($atts) {
     static $instance = 0;
     $instance++;
 
@@ -1485,7 +1749,7 @@ function gallery_shortcode($atts) {
     <?php
     return ob_get_clean();
 }
-add_shortcode('gallery', 'gallery_shortcode');
+add_shortcode('gallery', 'govph_gallery_shortcode');
 
 
 
