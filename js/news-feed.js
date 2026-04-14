@@ -76,6 +76,31 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initial load
   initNewsFeeds();
 
-  // Auto-update every 30 seconds
-  setInterval(initNewsFeeds, 30000);
+  // Trigger-based updates with IntersectionObserver (replaces setInterval)
+  const intervalMap = new Map();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const container = entry.target;
+      const instance = container.dataset.instance;
+      if (!instance) return;
+
+      if (entry.isIntersecting) {
+        if (!intervalMap.has(instance)) {
+          console.log(`News container ${instance} visible - starting refresh`);
+          // First update
+          updateNewsContainer(container);
+          // Interval while visible
+          const intId = setInterval(() => updateNewsContainer(container), 30000);
+          intervalMap.set(instance, intId);
+        }
+      } else if (intervalMap.has(instance)) {
+        console.log(`News container ${instance} hidden - stopping refresh`);
+        clearInterval(intervalMap.get(instance));
+        intervalMap.delete(instance);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.news-container[data-instance]').forEach(obs => observer.observe(obs));
 });
+
