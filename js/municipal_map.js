@@ -47,10 +47,13 @@
       }
     }
 
-    function renderScale(){
+function renderScale(){
       const visibleScale = fitScale * zoomLevel;
-      app.style.setProperty('--stage-width', `${(svgWidth * visibleScale).toFixed(3)}px`);
-      app.style.setProperty('--stage-height', `${(svgHeight * visibleScale).toFixed(3)}px`);
+      const svgStage = app.querySelector('.mmoc-svg-stage');
+      if (svgStage) {
+        svgStage.style.transform = `scale(${visibleScale})`;
+        svgStage.style.transformOrigin = '0 0';
+      }
       updatePanState();
     }
 
@@ -93,8 +96,8 @@
       const visibleScale = fitScale * zoomLevel;
       const stageWidth = svgWidth * visibleScale;
       const stageHeight = svgHeight * visibleScale;
-      const centeredLeft = Math.max((stageWidth - frameWidth) / 2, 0);
-      const centeredTop = Math.max((stageHeight - frameHeight) / 2, 0);
+      const centeredLeft = Math.max((svgWidth * visibleScale - frameWidth) / 2, 0);
+      const centeredTop = Math.max((svgHeight * visibleScale - frameHeight) / 2, 0);
 
       viewerFrame.scrollTo({ left: centeredLeft, top: centeredTop, behavior: 'auto' });
     }

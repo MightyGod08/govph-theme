@@ -12,8 +12,8 @@
   --shadow: 0 12px 28px rgba(17, 23, 36, 0.08);
   --stage-width: 1440px;
   --stage-height: 1024px;
-  --mmoc-width: 100%;
-  --mmoc-height: 80vh;
+  --mmoc-width: 60vw;
+  --mmoc-height: 100% ;
   color: var(--text-main);
 }
 .mmoc-app-shell * { box-sizing: border-box; }
@@ -25,11 +25,14 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  border-radius: 20px;
+  border-radius: 8px;
   background: var(--panel-bg);
   border: 1px solid rgba(18, 24, 38, 0.06);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 24px rgba(29, 38, 60, 0.274);
   backdrop-filter: none;
+  overflow: hidden;
+  animation: fade-in 1s ease-in-out forwards;
+
 }
 .mmoc-topbar { border-radius: 24px; padding: 18px 20px; display: block; }
 .mmoc-eyebrow { margin: 0 0 4px; color: var(--text-soft); letter-spacing: 0.18em; text-transform: uppercase; font-size: .72rem; }
@@ -49,7 +52,7 @@
   display: grid;
   place-items: center;
   border: 1px solid var(--frame-border);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--frame-bg);
   box-shadow: inset 0 0 0 1px var(--frame-inner-border);
   padding: 16px;
@@ -75,18 +78,19 @@
 }
 .mmoc-svg-stage {
   position: relative;
-  width: var(--stage-width);
-  height: var(--stage-height);
+  width: 1440px;
+  height: 1024px;
   max-width: 100%;
   max-height: 100%;
   margin: 0 auto;
   border-radius: 0;
   overflow: visible;
   box-shadow: none;
-  transition: width 180ms ease, height 180ms ease;
+  transition: transform 180ms ease;
+  background-color: gray;
 }
 .mmoc-svg-layer, .mmoc-floor-overlay-layer, .mmoc-site-hover-layer, .mmoc-hotspot-layer, .mmoc-indicator-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
-.mmoc-svg-layer { display: block; border-radius: 2px; }
+.mmoc-svg-layer { display: block; border-radius: 2px;; }
 .mmoc-svg-layer-base { z-index: 1; box-shadow: none; }
 .mmoc-svg-layer-base .mmoc-base-hover-target {
   cursor: pointer;
@@ -213,7 +217,7 @@
 }
 .mmoc-map-control {
   border: 1px solid rgba(17, 24, 39, 0.16);
-  border-radius: 14px;
+  border-radius: 8px;
   background: rgba(255,255,255,.96);
   color: #111827;
   font: 700 12px/1 "Segoe UI", Tahoma, sans-serif;
@@ -257,4 +261,47 @@
   .mmoc-map-controls { left: 18px; bottom: 18px; gap: 8px; }
   .mmoc-map-control-icon { width: 44px; height: 42px; font-size: 24px; }
   .mmoc-map-control-fit { min-width: 124px; height: 42px; padding: 0 14px; font-size: 11px; }
+}
+
+
+.mmoc-info{
+  background-color: #0b3440;
+  color: white;
+  border-radius: 6px;
+  text-align: center;
+  padding: 12px;
+}
+.mmoc-info h1{
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.mmoc-info > p{
+  font-size: 1rem;
+  margin: 0;
+  text-align: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+
+/* adding animation thingy */
+@keyframes pop-open{
+  0%{
+    height: 0px;
+    /* opacity: 0; */
+  }
+  100%{
+    height: var(--mmoc-height);
+  }
+}
+
+@keyframes fade-in {
+  0%{
+    opacity: 0;
+  }
+  100%{
+    opacity: 1;
+  }
 }

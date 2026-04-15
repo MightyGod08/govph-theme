@@ -2334,7 +2334,7 @@ function municipal_map_of_camaligan_shortcode($atts = []) {
 
     // Attributes
     $atts = shortcode_atts([
-        'width' => '100%',
+        'width' => '60vw',
         'height' => '80vh',
     ], $atts);
 
@@ -2376,143 +2376,153 @@ function municipal_map_of_camaligan_shortcode($atts = []) {
     ?>
 
     <div id="<?php echo esc_attr($id); ?>" class="mmoc-app-shell" style="--mmoc-width: <?php echo esc_attr($width); ?>; --mmoc-height: <?php echo esc_attr($height); ?>;">
-          <main class="mmoc-viewer-panel">
-            <section class="mmoc-viewer-frame">
-              <div class="mmoc-svg-stage">
+        
+        
+            <main class="mmoc-viewer-panel">
+                <div class="mmoc-info">
+                    <h1 style="color: #E6B800E6;">Visiting our Offices?</h1>
+                        <p>
+                            Check our Interactive Map of Offices to avoid getting lost<br>
+                            Some Offices are clickable. It directs you to their page  
+                        </p>
+                    <!-- <p>Click on the highlighted areas to view office details and contact information.</p> -->
+                </div>
+                <section class="mmoc-viewer-frame">
+            <div class="mmoc-svg-stage">
                 <img
-                  class="mmoc-svg-layer mmoc-svg-layer-base"
-                  src="<?php echo esc_url($base . 'umf.svg'); ?>"
-                  alt="Municipal map of Camaligan"
-                  width="1440"
-                  height="1024"
+                class="mmoc-svg-layer mmoc-svg-layer-base"
+                src="<?php echo esc_url($base . 'umf.svg'); ?>"
+                alt="Municipal map of Camaligan"
+                width="1440"
+                height="1024"
                 >
                 <svg class="mmoc-floor-overlay-layer" viewBox="0 0 1440 1024" preserveAspectRatio="none" aria-hidden="true">
-                  <defs>
+                <defs>
                     <clipPath id="<?php echo esc_attr($id); ?>-clip-building-left" clipPathUnits="userSpaceOnUse"><rect x="700" y="251" width="134" height="153"></rect></clipPath>
                     <clipPath id="<?php echo esc_attr($id); ?>-clip-building-other" clipPathUnits="userSpaceOnUse"><rect x="699" y="519" width="86" height="134"></rect></clipPath>
                     <clipPath id="<?php echo esc_attr($id); ?>-clip-building-upper-right" clipPathUnits="userSpaceOnUse"><rect x="949" y="261" width="120" height="63"></rect></clipPath>
                     <clipPath id="<?php echo esc_attr($id); ?>-clip-building-lower-right" clipPathUnits="userSpaceOnUse"><rect x="913" y="654" width="183" height="82"></rect></clipPath>
-                  </defs>
+                </defs>
 
-                  <image href="<?php echo esc_url($base . 'f1.svg'); ?>" class="mmoc-building-layer is-visible" data-building="left" data-floor="1" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-left)"></image>
-                  <image href="<?php echo esc_url($base . 'f2.svg'); ?>" class="mmoc-building-layer" data-building="left" data-floor="2" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-left)"></image>
-                  <image href="<?php echo esc_url($base . 'f3.svg'); ?>" class="mmoc-building-layer" data-building="left" data-floor="3" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-left)"></image>
+                    <image href="<?php echo esc_url($base . 'f1.svg'); ?>" class="mmoc-building-layer is-visible" data-building="left" data-floor="1" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-left)"></image>
+                    <image href="<?php echo esc_url($base . 'f2.svg'); ?>" class="mmoc-building-layer" data-building="left" data-floor="2" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-left)"></image>
+                    <image href="<?php echo esc_url($base . 'f3.svg'); ?>" class="mmoc-building-layer" data-building="left" data-floor="3" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-left)"></image>
 
-                  <image href="<?php echo esc_url($base . 'f1.svg'); ?>" class="mmoc-building-layer is-visible" data-building="other" data-floor="1" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-other)"></image>
-                  <image href="<?php echo esc_url($base . 'f2.svg'); ?>" class="mmoc-building-layer" data-building="other" data-floor="2" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-other)"></image>
+                    <image href="<?php echo esc_url($base . 'f1.svg'); ?>" class="mmoc-building-layer is-visible" data-building="other" data-floor="1" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-other)"></image>
+                    <image href="<?php echo esc_url($base . 'f2.svg'); ?>" class="mmoc-building-layer" data-building="other" data-floor="2" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-other)"></image>
 
-                  <image href="<?php echo esc_url($base . 'f1.svg'); ?>" class="mmoc-building-layer is-visible" data-building="upper-right" data-floor="1" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-upper-right)"></image>
-                  <image href="<?php echo esc_url($base . 'f2.svg'); ?>" class="mmoc-building-layer" data-building="upper-right" data-floor="2" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-upper-right)"></image>
-                  <image href="<?php echo esc_url($base . 'f3.svg'); ?>" class="mmoc-building-layer" data-building="upper-right" data-floor="3" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-upper-right)"></image>
+                    <image href="<?php echo esc_url($base . 'f1.svg'); ?>" class="mmoc-building-layer is-visible" data-building="upper-right" data-floor="1" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-upper-right)"></image>
+                    <image href="<?php echo esc_url($base . 'f2.svg'); ?>" class="mmoc-building-layer" data-building="upper-right" data-floor="2" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-upper-right)"></image>
+                    <image href="<?php echo esc_url($base . 'f3.svg'); ?>" class="mmoc-building-layer" data-building="upper-right" data-floor="3" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-upper-right)"></image>
 
-                  <image href="<?php echo esc_url($base . 'f1.svg'); ?>" class="mmoc-building-layer is-visible" data-building="lower-right" data-floor="1" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-lower-right)"></image>
-                  <image href="<?php echo esc_url($base . 'f2.svg'); ?>" class="mmoc-building-layer" data-building="lower-right" data-floor="2" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-lower-right)"></image>
+                    <image href="<?php echo esc_url($base . 'f1.svg'); ?>" class="mmoc-building-layer is-visible" data-building="lower-right" data-floor="1" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-lower-right)"></image>
+                    <image href="<?php echo esc_url($base . 'f2.svg'); ?>" class="mmoc-building-layer" data-building="lower-right" data-floor="2" x="0" y="0" width="1440" height="1024" preserveAspectRatio="none" clip-path="url(#<?php echo esc_attr($id); ?>-clip-building-lower-right)"></image>
                 </svg>
 
                 <svg class="mmoc-site-hover-layer" viewBox="0 0 1440 1024" aria-hidden="true">
-                  <g class="mmoc-office-hover-group" data-office-group="health-upper" aria-hidden="true">
+                    <g class="mmoc-office-hover-group" data-office-group="health-upper" aria-hidden="true">
                     <g fill="none" stroke="#050505" stroke-width="2.5" stroke-dasharray="9 8">
-                      <path class="mmoc-office-hover-guide" d="M368 240V138H500V272H436"></path>
-                    </g>
-                  </g>
-                  <g class="mmoc-office-hover-group" data-office-group="medtech" aria-hidden="true">
+                        <path class="mmoc-office-hover-guide" d="M368 240V138H500V272H436"></path>
+                </g>
+                </g>
+                    <g class="mmoc-office-hover-group" data-office-group="medtech" aria-hidden="true">
                     <g fill="none" stroke="#050505" stroke-width="2.9" stroke-dasharray="9 8">
-                      <path class="mmoc-office-hover-guide" d="M344 238V336H434V272"></path>
-                    </g>
-                  </g>
-                  <g class="mmoc-office-hover-zone mmoc-office-hover-zone-guide" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="Healthcare Area">
+                        <path class="mmoc-office-hover-guide" d="M344 238V336H434V272"></path>
+                </g>
+                </g>
+                    <g class="mmoc-office-hover-zone mmoc-office-hover-zone-guide" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="Healthcare Area">
                     <title>Healthcare Area</title>
                     <path class="mmoc-office-hover-hit mmoc-office-hover-hit-guide" d="M368 240V138H500V272H436"></path>
                     <path class="mmoc-office-hover-hit mmoc-office-hover-hit-guide" d="M344 238V336H434V272"></path>
                     <path class="mmoc-office-hover-highlight mmoc-office-hover-highlight-guide" d="M368 240V138H500V272H436"></path>
                     <path class="mmoc-office-hover-highlight mmoc-office-hover-highlight-guide" d="M344 238V336H434V272"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="umf-rect-014" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="MedTech Office">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="umf-rect-014" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="MedTech Office">
                     <title>MedTech Office</title>
                     <rect class="mmoc-office-hover-hit" x="359.5" y="246.5" width="70" height="75"></rect>
                     <rect class="mmoc-office-hover-highlight" x="359.5" y="246.5" width="70" height="75"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="umf-rect-015" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="umf-rect-015">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="umf-rect-015" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="umf-rect-015">
                     <title>RHW Office</title>
                     <rect class="mmoc-office-hover-hit" x="440.5" y="204.5" width="40" height="61"></rect>
                     <rect class="mmoc-office-hover-highlight" x="440.5" y="204.5" width="40" height="61"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="umf-rect-017" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="umf-rect-017">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="umf-rect-017" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="umf-rect-017">
                     <title>TBDOTS</title>
                     <rect class="mmoc-office-hover-hit" x="458.5" y="149.5" width="27" height="44"></rect>
                     <rect class="mmoc-office-hover-highlight" x="458.5" y="149.5" width="27" height="44"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="umf-rect-018" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="umf-rect-018">
-                    <title>Prenatal Building</title>
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="umf-rect-018" data-hover-group="health-cluster" tabindex="0" role="button" aria-label="umf-rect-018">
+                <title>Prenatal Building</title>
                     <rect class="mmoc-office-hover-hit" x="378.5" y="146.5" width="40" height="64"></rect>
                     <rect class="mmoc-office-hover-highlight" x="378.5" y="146.5" width="40" height="64"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="umf-rect-013" tabindex="0" role="button" aria-label="umf-rect-013">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="umf-rect-013" tabindex="0" role="button" aria-label="umf-rect-013">
                     <title>CADRRESMO</title>
                     <rect class="mmoc-office-hover-hit" x="440.5" y="275.5" width="69" height="72"></rect>
                     <rect class="mmoc-office-hover-highlight" x="440.5" y="275.5" width="69" height="72"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f1-rect-007" data-hover-group="left-floor-1-pair-a" data-building="left" data-floor="1" tabindex="0" role="button" aria-label="f1-rect-007">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f1-rect-007" data-hover-group="left-floor-1-pair-a" data-building="left" data-floor="1" tabindex="0" role="button" aria-label="f1-rect-007">
                     <title>Assessor's Office</title>
                     <rect class="mmoc-office-hover-hit" x="700.5" y="251.5" width="60" height="56"></rect>
                     <rect class="mmoc-office-hover-highlight" x="700.5" y="251.5" width="60" height="56"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f1-path-002" data-hover-group="left-floor-1-pair-a" data-building="left" data-floor="1" tabindex="0" role="button" aria-label="f1-path-002">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f1-path-002" data-hover-group="left-floor-1-pair-a" data-building="left" data-floor="1" tabindex="0" role="button" aria-label="f1-path-002">
                     <title>Assessor's Office</title>
                     <path class="mmoc-office-hover-hit" d="M833.5 251.5V307.5H784.18V285.5H760.5V251.5H833.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M833.5 251.5V307.5H784.18V285.5H760.5V251.5H833.5Z"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f1-path-001" data-building="left" data-floor="1" tabindex="0" role="button" aria-label="f1-path-001">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f1-path-001" data-building="left" data-floor="1" tabindex="0" role="button" aria-label="f1-path-001">
                     <title>MPDC Office</title>
                     <path class="mmoc-office-hover-hit" d="M760.5 341.5V366H833.5V404.5H700.5V341.5H760.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M760.5 341.5V366H833.5V404.5H700.5V341.5H760.5Z"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f2-path-004" data-hover-group="left-floor-2-pair-a" data-building="left" data-floor="2" tabindex="0" role="button" aria-label="f2-path-004">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f2-path-004" data-hover-group="left-floor-2-pair-a" data-building="left" data-floor="2" tabindex="0" role="button" aria-label="f2-path-004">
                     <title>Tourism's Office</title>
                     <path class="mmoc-office-hover-hit" d="M833.5 251.5V306H760.5V251.5H833.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M833.5 251.5V306H760.5V251.5H833.5Z"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f2-path-003" data-hover-group="left-floor-2-pair-a" data-building="left" data-floor="2" tabindex="0" role="button" aria-label="f2-path-003">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f2-path-003" data-hover-group="left-floor-2-pair-a" data-building="left" data-floor="2" tabindex="0" role="button" aria-label="f2-path-003">
                     <title>Tourism's Office</title>
                     <path class="mmoc-office-hover-hit" d="M760.5 251.5V282.5H737V307.5H700.5V251.5H760.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M760.5 251.5V282.5H737V307.5H700.5V251.5H760.5Z"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f2-rect-019" data-building="left" data-floor="2" tabindex="0" role="button" aria-label="f2-rect-019">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f2-rect-019" data-building="left" data-floor="2" tabindex="0" role="button" aria-label="f2-rect-019">
                     <title>HR Office</title>
                     <rect class="mmoc-office-hover-hit" x="700.5" y="372.5" width="60" height="31"></rect>
                     <rect class="mmoc-office-hover-highlight" x="700.5" y="372.5" width="60" height="31"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f3-path-004" data-hover-group="left-floor-3-cluster-a" data-building="left" data-floor="3" tabindex="0" role="button" aria-label="f3-path-004">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f3-path-004" data-hover-group="left-floor-3-cluster-a" data-building="left" data-floor="3" tabindex="0" role="button" aria-label="f3-path-004">
                     <title>Mayor's Office</title>
                     <path class="mmoc-office-hover-hit" d="M739.5 305.5V328.5H751.5V349.5H833.5V305.5H739.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M739.5 305.5V328.5H751.5V349.5H833.5V305.5H739.5Z"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f3-path-002" data-hover-group="left-floor-3-cluster-a" data-building="left" data-floor="3" tabindex="0" role="button" aria-label="f3-path-002">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f3-path-002" data-hover-group="left-floor-3-cluster-a" data-building="left" data-floor="3" tabindex="0" role="button" aria-label="f3-path-002">
                     <title>Mayor's Office</title>
                     <path class="mmoc-office-hover-hit" d="M833.5 251.5V305.5H700.5V251.5H833.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M833.5 251.5V305.5H700.5V251.5H833.5Z"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f3-path-003" data-hover-group="left-floor-3-cluster-a" data-building="left" data-floor="3" tabindex="0" role="button" aria-label="f3-path-003">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f3-path-003" data-hover-group="left-floor-3-cluster-a" data-building="left" data-floor="3" tabindex="0" role="button" aria-label="f3-path-003">
                     <title>Mayor's Office</title>
                     <path class="mmoc-office-hover-hit" d="M833.5 349.5V403.5H700.5V349.5H833.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M833.5 349.5V403.5H700.5V349.5H833.5Z"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f1-rect-005" data-building="upper-right" data-floor="1" tabindex="0" role="button" aria-label="f1-rect-005">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f1-rect-005" data-building="upper-right" data-floor="1" tabindex="0" role="button" aria-label="f1-rect-005">
                     <title>Civil Registrar's Office</title>
                     <rect class="mmoc-office-hover-hit" x="949.5" y="261.5" width="64" height="33"></rect>
                     <rect class="mmoc-office-hover-highlight" x="949.5" y="261.5" width="64" height="33"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f2-path-001" data-building="upper-right" data-floor="2" tabindex="0" role="button" aria-label="f2-path-001">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f2-path-001" data-building="upper-right" data-floor="2" tabindex="0" role="button" aria-label="f2-path-001">
                     <title>Accounting Office</title>
                     <path class="mmoc-office-hover-hit" d="M985.5 261.5V294.5H962.889V323.5H949.5V261.5H985.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M985.5 261.5V294.5H962.889V323.5H949.5V261.5H985.5Z"></path>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f2-rect-003" data-building="upper-right" data-floor="2" tabindex="0" role="button" aria-label="f2-rect-003">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f2-rect-003" data-building="upper-right" data-floor="2" tabindex="0" role="button" aria-label="f2-rect-003">
                     <title>Budget Office</title>
                     <rect class="mmoc-office-hover-hit" x="962.5" y="294.5" width="88" height="29"></rect>
                     <rect class="mmoc-office-hover-highlight" x="962.5" y="294.5" width="88" height="29"></rect>
-                  </g>
-                  <g class="mmoc-office-hover-zone" data-office="f2-path-006" data-building="upper-right" data-floor="2" tabindex="0" role="button" aria-label="f2-path-006">
+                </g>
+                <g class="mmoc-office-hover-zone" data-office="f2-path-006" data-building="upper-right" data-floor="2" tabindex="0" role="button" aria-label="f2-path-006">
                     <title>MCTC Office</title>
                     <path class="mmoc-office-hover-hit" d="M1043.5 272.5V281.802H1049.34V294.5H1024V323.5H1068.5V272.5H1043.5Z"></path>
                     <path class="mmoc-office-hover-highlight" d="M1043.5 272.5V281.802H1049.34V294.5H1024V323.5H1068.5V272.5H1043.5Z"></path>
@@ -2617,13 +2627,13 @@ function municipal_map_of_camaligan_shortcode($atts = []) {
               </div>
             </section>
             <div class="mmoc-map-controls" data-mmoc-controls aria-label="Map controls">
-              <button type="button" class="mmoc-map-control mmoc-map-control-icon" data-action="zoom-in" aria-label="Zoom in">+</button>
+              <button type="button" class="mmoc-map-control mmoc-map-control-icon" data-action="zoom-in" aria-label="Zoom in" style="background-color: #0E2F3B; color:white;">+</button>
               <button type="button" class="mmoc-map-control mmoc-map-control-fit" data-action="reset">FIT TO FRAME</button>
               <button type="button" class="mmoc-map-control mmoc-map-control-icon" data-action="zoom-out" aria-label="Zoom out">-</button>
             </div>
 
           </main>
-        </div>x
+        </div>  
 
     <?php
     return ob_get_clean();
@@ -2631,4 +2641,223 @@ function municipal_map_of_camaligan_shortcode($atts = []) {
 
 // Register shortcode
 add_shortcode('municipal_map_of_camaligan', 'municipal_map_of_camaligan_shortcode');
+
+
+// === Interactive Map ===
+
+// =========================
+// MAP ASSET
+// =========================
+
+function cim_get_barangay_labels() {
+    return [
+        'tarosanan' => 'Tarosanan',
+        'sua' => 'Sua',
+        'stoTomas' => 'Sto. Tomas',
+        'stoDomingo' => 'Sto. Domingo',
+        'sanRoque' => 'San Roque',
+        'sanMateo' => 'San Mateo',
+        'sanMarcos' => 'San Marcos',
+        'sanLucas' => 'San Lucas',
+        'sanJuanSanRamon' => 'San Juan / San Ramon',
+        'sanJoseSanPablo' => 'San Jose / San Pablo',
+        'sanFrancisco' => 'San Francisco',
+        'marupit' => 'Marupit',
+        'dugcal' => 'Dugcal',
+    ];
+}
+
+function cim_get_barangay_routes() {
+    return [
+        'tarosanan' => '',
+        'sua' => '',
+        'stoTomas' => '',
+        'stoDomingo' => '',
+        'sanRoque' => '',
+        'sanMateo' => '',
+        'sanMarcos' => '',
+        'sanLucas' => '',
+        'sanJuanSanRamon' => '',
+        'sanJoseSanPablo' => '',
+        'sanFrancisco' => '',
+        'marupit' => '',
+        'dugcal' => '',
+    ];
+}
+
+function cim_get_road_types() {
+    return [
+        'national' => [
+            'label' => 'National Road',
+            'description' => 'Primary roads connecting to highways.',
+            'color' => '#00ff00',
+        ],
+        'provincial' => [
+            'label' => 'Provincial Road',
+            'description' => 'Inter-municipality roads.',
+            'color' => '#8ed400',
+        ],
+        'municipal' => [
+            'label' => 'Municipal Road',
+            'description' => 'Main local roads.',
+            'color' => '#ffe34d',
+        ],
+        'barangay' => [
+            'label' => 'Barangay Road',
+            'description' => 'Small local roads.',
+            'color' => '#d5d5ff',
+        ],
+    ];
+}
+
+/**
+ * Enqueue Assets
+ */
+function cim_enqueue_assets() {
+
+    $style_path = get_template_directory() . '/assets/images/camaligan-map.css';
+    $script_path = get_template_directory() . '/js/camaligan-map.js';
+
+    $style_version = file_exists($style_path) ? filemtime($style_path) : '1.0';
+    $script_version = file_exists($script_path) ? filemtime($script_path) : '1.0';
+
+    wp_register_style(
+        'cim-style',
+        get_template_directory_uri() . '/assets/images/camaligan-map.css',
+        [],
+        $style_version
+    );
+
+    wp_register_script(
+        'cim-script',
+        get_template_directory_uri() . '/js/camaligan-map.js',
+        [],
+        $script_version,
+        true
+    );
+
+    wp_localize_script('cim-script', 'camaliganMapData', [
+        'restUrl' => esc_url_raw(rest_url('camaligan-map/v1/barangay/')),
+        'labels'  => cim_get_barangay_labels(),
+        'routes'  => cim_get_barangay_routes(),
+        'roadTypes' => cim_get_road_types(),
+    ]);
+}
+add_action('wp_enqueue_scripts', 'cim_enqueue_assets');
+
+/**
+ * Shortcode
+ */
+function cim_render_map($atts = []) {
+$atts = shortcode_atts([
+        'width' => '45vw',
+        'height' => '45vh'
+    ], $atts, 'camaligan_interactive_map');
+
+    $width = sanitize_text_field($atts['width']);
+    $height = sanitize_text_field($atts['height']);
+
+    wp_enqueue_style('cim-style');
+    wp_enqueue_script('cim-script');
+
+    $svg_path = get_template_directory() . '/assets/images/camaliganMap.svg';
+
+    if (!file_exists($svg_path)) {
+        return '<div class="cim-error">SVG not found</div>';
+    }
+
+    $svg = file_get_contents($svg_path);
+
+    // Inject width and height attributes into SVG tag
+    $svg = preg_replace(
+        '/<svg([^>]*)>/',
+        sprintf('<svg width="%s" height="%s" $1>', esc_attr($width), esc_attr($height)),
+        $svg,
+        1
+    );
+
+    // Generate barangay labels for select dropdown
+    $barangay_labels = cim_get_barangay_labels();
+
+    ob_start();
+    ?>
+    <div class="cim-wrapper" style="display: flex; justify-content: center; align-items: center; min-width: <?php echo esc_attr($width); ?>; min-height: <?php echo esc_attr($height); ?>;">
+        
+
+        <div class="cim-shell">
+            <div class="mmoc-info">
+                    <h1 style="color: #E6B800E6;">Camaligan Map Area</h1>
+                    <p>
+                        The thirteen barangays of Camaligan are represented here. 
+            </div> 
+            <div class="cim-toolbar">
+                
+
+                <label for="cim-barangay-select"><strong>Jump to barangay:</strong></label>
+                <select id="cim-barangay-select" class="cim-barangay-select">
+                    <option value="">Select a barangay</option>
+                    <?php foreach ($barangay_labels as $id => $label): ?>
+                        <option value="<?php echo esc_attr($id); ?>"><?php echo esc_html($label); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="cim-map-stage" id="cim-map-stage">
+                <div class="cim-map-controls" aria-label="Map controls">
+                    <button type="button" class="cim-map-control" id="cim-zoom-in" aria-label="Zoom in">+</button>
+                    <button type="button" class="cim-map-control cim-map-control-fit" id="cim-fit-map">Fit To Frame</button>
+                    <button type="button" class="cim-map-control cim-map-control-minus" id="cim-zoom-out" aria-label="Zoom out">-</button>
+                </div>
+                <div class="cim-map-tooltip" id="cim-map-tooltip" hidden></div>
+                <div class="cim-map-viewport" id="cim-map-viewport">
+                    <div class="cim-map-surface" id="cim-map-surface">
+                        <div class="cim-map-container">
+                            <?php echo $svg; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <aside class="cim-info-panel cim-info-panel-hidden" id="cim-info-panel" aria-live="polite" aria-hidden="true"></aside>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('camaligan_interactive_map', 'cim_render_map');
+
+/**
+ * REST API
+ */
+function cim_register_routes() {
+    register_rest_route('camaligan-map/v1', '/barangay/(?P<slug>[a-zA-Z0-9_-]+)', [
+        'methods'  => 'GET',
+        'callback' => 'cim_get_barangay_data',
+        'permission_callback' => '__return_true',
+    ]);
+}
+add_action('rest_api_init', 'cim_register_routes');
+
+function cim_get_barangay_data($request) {
+
+    $slug = sanitize_text_field($request['slug']);
+    $data = cim_get_dataset();
+
+    if (!isset($data[$slug])) {
+        return new WP_REST_Response(['error' => 'Not found'], 404);
+    }
+
+    return new WP_REST_Response($data[$slug], 200);
+}
+
+function cim_get_dataset() {
+    $routes = cim_get_barangay_routes();
+
+    return [
+        'tarosanan' => [
+            'slug' => 'tarosanan',
+            'name' => 'Tarosanan',
+            'route' => $routes['tarosanan'],
+        ],
+        // add others same as before...
+    ];
+}
 
