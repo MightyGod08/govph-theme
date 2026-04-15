@@ -56,19 +56,19 @@ add_action('wp_enqueue_scripts', 'news_feed_script');
         
         <div class="news-container data-news-container-<?php echo esc_attr($instance); ?>" 
         data-instance="<?php echo esc_attr($instance); ?>" data-endpoint="<?php echo esc_attr($request_url); ?>"
-        style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-</xai:function_call.
+        style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;  width:20rem;   box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        </xai:function_call.
 
 
 
 
 
-<xai:function_call name="edit_file">
-<parameter name="path">
-
+        <xai:function_call name="edit_file">
+        <parameter name="path">
             <h2>Latest News</h2>
-            <div class="news-list" style="display:grid;gap:20px;">
-                <?php foreach ($news_items as $item) : ?>
+            <div class="news-list" style="display:flex; flex-direction:column; gap:20px;width:100% padding:20px;
+            max-width:560px;">
+                    <?php foreach ($news_items as $item) : ?>
                     <?php
                     $title = isset($item['title']['rendered']) ? wp_strip_all_tags($item['title']['rendered']) : 'Untitled';
                     $excerpt = isset($item['excerpt']['rendered']) ? wp_strip_all_tags($item['excerpt']['rendered']) : '';
