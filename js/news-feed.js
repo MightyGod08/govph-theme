@@ -39,21 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
             featuredImage = img.media_details?.sizes?.medium?.source_url || img.source_url || '';
           }
 
-          html += `
-            <article style="border-bottom:1px solid #d1d8df;padding:20px;background:transparent; box0-shadow:0 1px 3px rgba(0,0,0,0.05);border-radius:8px; font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <h3 style="margin:0;font-size:20px;line-height:1.4;color:#163447;">
-                  <a href="${link}" style="text-decoration:none;color:#163447;font-weight:600;">${title}</a>
-                </h3>
-                <div style="display:flex;gap:12px;align-items:center;color:#5b6b79;font-size:14px;">
-                  <span style="font-weight:600;">📅 ${date}</span>
-                  ${featuredImage ? `<img src="${featuredImage}" alt="${title.replace(/"/g, '"')}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;">` : ''}
-                </div>
-                <div style="color:#555;line-height:1.6;font-size:15px;">${excerpt.split(' ').slice(0,25).join(' ') || ''}...</div>
-                <a href="${link}" style="color:#0b3440;text-decoration:none;font-weight:600;font-size:14px;">Read More →</a>
-              </div>
-            </article>
-          `;
+html += `\n            <article style="padding:16px 0;border-bottom:1px solid #e5e7eb;">\n              ${featuredImage ? `\n                <a href="${link}">\n                  <img src="${featuredImage}" alt="${title.replace(/"/g, '"')}" style="width:100%; height:200px; object-fit:cover; border-radius:8px; display:block; margin-bottom:12px;">\n                </a>` : ''}\n              \n              <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">📅 ${date}</div>\n              \n              <h3 style="margin:0 0 8px 0;font-size:18px;line-height:1.4;">\n                <a href="${link}" style="text-decoration:none;color:#163447;font-weight:600;">${title}</a>\n              </h3>\n            </article>\n          `;
         });
 
         list.innerHTML = html;

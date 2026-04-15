@@ -1,8 +1,41 @@
 <?php
 // =========================
+// CAMALIGAN OFFICIAL WEBSITE - Custom Theme Functions
+// ojt
+
+//========================
+
+
+
+$Color_Pallette = array(
+    "primary"=>"#0E2F3B",
+    "secondary"=>"#1F2937",
+    "accent"=>"#EAB308",
+    "background"=>"#F8F8F8",
+    "text"=>"#374151",
+);
+
+$Font_Pallette = array(
+    "primary"=>"Georgia, 'Times New Roman', serif",
+    "secondary"=>"'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    "monospace"=>"'Courier New', Courier, monospace"
+);
+
+function camaligan_css() {
+    wp_enqueue_style(
+        'cmg-theme-style',
+        get_stylesheet_uri('style.css'),
+        array(),
+        '1.0'
+    );
+}
+add_action( "wp_enqueue_scripts", 'camaligan_css');
+
+
+
+// =========================
 // News Shortcode - Fetches from /wp-json/wp/v2/news_item
 // =========================
-
 
 function news_feed_script() {
     wp_enqueue_script(
@@ -13,7 +46,6 @@ function news_feed_script() {
         true
     );
 }
-
 add_action('wp_enqueue_scripts', 'news_feed_script');
 
     function news_shortcode($atts) {
@@ -56,7 +88,7 @@ add_action('wp_enqueue_scripts', 'news_feed_script');
         
         <div class="news-container data-news-container-<?php echo esc_attr($instance); ?>" 
         data-instance="<?php echo esc_attr($instance); ?>" data-endpoint="<?php echo esc_attr($request_url); ?>"
-        style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;  width:20rem;   box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;  min-width:20rem; width:100%;   box-shadow:0 4px 12px rgba(0,0,0,0.08); font-family:ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#163447;">
         </xai:function_call.
 
 
@@ -82,18 +114,20 @@ add_action('wp_enqueue_scripts', 'news_feed_script');
                     ?>
                     <article style="border:1px solid #dbe4ea;border-radius:12px;padding:24px;background:#f9fbfd;display:flex;gap:20px;">
                         <?php if ($featured_image) : ?>
-                            <div style="flex:0 0 120px;">
+                            <div style="flex:0 1 20px;">
                                 <img src="<?php echo esc_url($featured_image); ?>" alt="<?php echo esc_attr($title); ?>" style="width:100%;height:100px;object-fit:cover;border-radius:8px;">
                             </div>
-                        <?php endif; ?>
+                        <?php endif; ?> 
                         <div style="flex:1;">
+                            <div style="display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:start;color:#5b6b79;font-size:14px;margin-bottom:12px;">
+                                <div style="font-weight:600;min-width:60px;"></div>
+                                <div><?php echo esc_html($date); ?></div>
+                            </div>
+
                             <h3 style="margin:0 0 12px;font-size:20px;line-height:1.4;color:#163447;">
                                 <a href="<?php echo esc_url($link); ?>" style="text-decoration:none;color:#163447;"><?php echo esc_html($title); ?></a>
                             </h3>
-                            <div style="display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:start;color:#5b6b79;font-size:14px;margin-bottom:12px;">
-                                <div style="font-weight:600;min-width:60px;">📅</div>
-                                <div><?php echo esc_html($date); ?></div>
-                            </div>
+                            
                             <div style="color:#555;line-height:1.6;margin-bottom:16px;font-size:15px;"><?php echo esc_html(wp_trim_words($excerpt, 25)); ?></div>
                             <a href="<?php echo esc_url($link); ?>" style="color:#0b3440;text-decoration:none;font-weight:600;font-size:14px;">Read More →</a>
                         </div>
@@ -380,9 +414,9 @@ function holiday_calendar_shortcode($atts) {
     $monthName = $date->format('F Y');
 
     $output = '
-    <div class="my-custom-styled-calendar" data-year="' . $year . '" data-month="' . ($month + 1) . '" style="max-width:380px;margin:0 auto;padding:20px;background:#f8f8f8;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.08);font-family:inherit;">
-        <div style="margin-bottom:18px;text-align:center;">
-            <h3 style="margin:0;font-size:28px;font-weight:700;color:#1f2937;">' . $monthName . '</h3>
+    <div class="my-custom-styled-calendar" data-year="' . $year . '" data-month="' . ($month + 1) . '" style="max-width:20rem;margin:0 auto;padding:20px;background:#f8f8f8;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.08);font-family:monospace, monospace;">
+        <div style="margin-bottom:18px;text-align:center;background:#0E2F3B;;padding:12px 0;border-radius:8px;">
+            <h3 style="margin:0;font-size:28px;font-weight:700;color:white;">' . $monthName . '</h3>
         </div>
         <table id="static-cal-' . $instance . '" style="width:100%;border-collapse:separate;border-spacing:8px;text-align:center;">
             <thead>
@@ -580,8 +614,9 @@ function camaligan_weather_shortcode() {
     ?>
 
     <div style="display:flex;justify-content:center;margin:20px 0;">
-        <div id="weather-box-<?php echo esc_attr($instance); ?>" style="
-            width:100%;
+        <div id="weather-box-<?php echo esc_attr($instance);?>" 
+
+        style="width:100%;
             max-width:560px;
             background:#fff;
             border-radius:12px;
@@ -589,8 +624,8 @@ function camaligan_weather_shortcode() {
             box-shadow:0 4px 12px rgba(0,0,0,0.15);
             font-family:Arial,sans-serif;
             color:#163447;
-            box-sizing:border-box;
-        ">
+            box-sizing:border-box;">
+
             <h2 style="
                 margin:0 0 24px 0;
                 font-size:28px;
@@ -734,7 +769,7 @@ function custom_live_time_shortcode($atts) {
     ob_start();
     ?>
 
-    <div class="live-time-container" data-live-time data-instance="<?php echo esc_attr($instance); ?>" data-timezone="<?php echo esc_attr($atts['timezone']); ?>" data-format="<?php echo esc_attr($atts['format']); ?>" style="display:flex;justify-content:center;margin:20px 0;">
+    <div class="live-time-container" data-live-time data-instance="<?php echo esc_attr($instance); ?>" data-timezone="<?php echo esc_attr($atts['timezone']); ?>" data-format="<?php echo esc_attr($atts['format']); ?>" style="display:flex;justify-content:center;;margin:20px 0;">
         <div id="live-time-card-<?php echo esc_attr($instance); ?>" style="
             width:100%;
             max-width:620px;
