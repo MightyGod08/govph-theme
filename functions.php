@@ -31,6 +31,260 @@ function camaligan_css() {
 }
 add_action( "wp_enqueue_scripts", 'camaligan_css');
 
+// =========================
+// Municipal Ordinances Shortcode
+// Usage: [municipal_ordinances] or [ordinances]
+// =========================
+function municipal_ordinances_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+
+    $atts = shortcode_atts(array(
+        'per_page' => 6,
+        'category' => 'administrative',
+        'title'    => 'Municipal Ordinances',
+    ), $atts, 'municipal_ordinances');
+
+    $per_page = max(1, min(20, intval($atts['per_page'])));
+    $heading = sanitize_text_field($atts['title']);
+    $active_category = sanitize_title($atts['category']);
+
+    $ordinance_categories = array(
+        'administrative'   => 'Administrative',
+        'development'      => 'Development',
+        'environment'      => 'Environment',
+        'health'           => 'Health',
+        'local-taxation'   => 'Local Taxation',
+        'public-utilities' => 'Public Utilities',
+        'social'           => 'Social',
+    );
+
+    if (!isset($ordinance_categories[$active_category])) {
+        $active_category = 'administrative';
+    }
+
+    $query_args = array(
+        'post_type'           => 'post',
+        'posts_per_page'      => $per_page,
+        'post_status'         => 'publish',
+        'orderby'             => 'date',
+        'order'               => 'DESC',
+        'ignore_sticky_posts' => true,
+        'category_name'       => $active_category,
+    );
+
+    $ordinances_query = new WP_Query($query_args);
+    $active_term = get_category_by_slug($active_category);
+    $active_link = $active_term ? get_category_link($active_term) : home_url('/category/' . $active_category . '/');
+
+    if (is_wp_error($active_link)) {
+        $active_link = home_url('/category/' . $active_category . '/');
+    }
+
+    ob_start();
+    ?>
+    <section class="municipal-ordinances-shortcode municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?>" style="width:100%;box-sizing:border-box;background:#ffffff;border-radius:4px;padding:36px 42px 34px;box-shadow:0 4px 12px rgba(15,23,42,0.22);font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#0E2F3B;">
+        <style>
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-tabs {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 22px;
+                margin: 0 0 34px;
+            }
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-tab {
+                min-width: 128px;
+                padding: 12px 24px;
+                border: 1px solid #b8b8b8;
+                border-radius: 6px;
+                background: #ffffff;
+                color: #0E2F3B;
+                font: inherit;
+                font-size: 18px;
+                line-height: 1.25;
+                text-align: center;
+                cursor: pointer;
+                transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            }
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-tab.is-active {
+                background: #0E2F3B;
+                border-color: #0E2F3B;
+                color: #ffffff;
+            }
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-panel {
+                min-height: 190px;
+                border: 1px solid #b8b8b8;
+                border-radius: 4px;
+                padding: 22px 26px;
+                box-sizing: border-box;
+                margin: 0 0 24px;
+            }
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-item {
+                display: flex;
+                justify-content: space-between;
+                gap: 18px;
+                padding: 11px 0;
+                border-bottom: 1px solid #e5e7eb;
+                color: #111827;
+                font-size: 15px;
+                line-height: 1.45;
+            }
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-item:last-child {
+                border-bottom: 0;
+            }
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-item a {
+                color: #0E2F3B;
+                font-weight: 700;
+                text-decoration: none;
+            }
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-date {
+                color: #64748b;
+                flex: 0 0 auto;
+                white-space: nowrap;
+            }
+            .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-view-all {
+                color: #0E2F3B;
+                font-size: 22px;
+                font-weight: 800;
+                line-height: 1.3;
+                text-decoration: none;
+            }
+            @media (max-width: 720px) {
+                .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> {
+                    padding: 28px 18px 26px !important;
+                }
+                .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-tabs {
+                    gap: 12px;
+                }
+                .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-tab {
+                    flex: 1 1 150px;
+                    min-width: 0;
+                    font-size: 16px;
+                    padding: 11px 14px;
+                }
+                .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-item {
+                    display: block;
+                }
+                .municipal-ordinances-shortcode-<?php echo esc_attr($instance); ?> .municipal-ordinances-date {
+                    display: block;
+                    margin-top: 5px;
+                    white-space: normal;
+                }
+            }
+        </style>
+
+        <?php if (!empty($heading)) : ?>
+            <h2 style="margin:0 0 32px;color:#0E2F3B;font-family:Georgia,'Times New Roman',serif;font-size:46px;line-height:1.12;font-weight:700;letter-spacing:0;">
+                <?php echo esc_html($heading); ?>
+            </h2>
+        <?php endif; ?>
+
+        <div class="municipal-ordinances-tabs" role="tablist" aria-label="Municipal ordinance categories">
+            <?php foreach ($ordinance_categories as $slug => $label) : ?>
+                <button
+                    type="button"
+                    class="municipal-ordinances-tab <?php echo $slug === $active_category ? 'is-active' : ''; ?>"
+                    data-category="<?php echo esc_attr($slug); ?>"
+                    data-label="<?php echo esc_attr($label); ?>"
+                    role="tab"
+                    aria-selected="<?php echo $slug === $active_category ? 'true' : 'false'; ?>">
+                    <?php echo esc_html($label); ?>
+                </button>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="municipal-ordinances-panel" aria-live="polite">
+            <?php if ($ordinances_query->have_posts()) : ?>
+                <?php while ($ordinances_query->have_posts()) : $ordinances_query->the_post(); ?>
+                    <div class="municipal-ordinances-item">
+                        <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                        <span class="municipal-ordinances-date"><?php echo esc_html(get_the_date('F j, Y')); ?></span>
+                    </div>
+                <?php endwhile; ?>
+                <?php wp_reset_postdata(); ?>
+            <?php endif; ?>
+        </div>
+
+        <a class="municipal-ordinances-view-all" href="<?php echo esc_url($active_link); ?>">
+            View all <span class="municipal-ordinances-active-label"><?php echo esc_html($ordinance_categories[$active_category]); ?></span> Ordinances
+        </a>
+    </section>
+
+    <script>
+    (function() {
+        const wrapper = document.querySelector('.municipal-ordinances-shortcode-<?php echo esc_js($instance); ?>');
+        if (!wrapper) {
+            return;
+        }
+
+        const tabs = wrapper.querySelectorAll('.municipal-ordinances-tab');
+        const panel = wrapper.querySelector('.municipal-ordinances-panel');
+        const activeLabel = wrapper.querySelector('.municipal-ordinances-active-label');
+        const viewAll = wrapper.querySelector('.municipal-ordinances-view-all');
+        const endpoint = '<?php echo esc_url_raw(rest_url('govph/v1/ordinances')); ?>';
+        const perPage = <?php echo intval($per_page); ?>;
+
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                const category = tab.getAttribute('data-category');
+                const label = tab.getAttribute('data-label');
+                const url = new URL(endpoint);
+
+                url.searchParams.set('category', category);
+                url.searchParams.set('per_page', perPage);
+
+                tabs.forEach(function(item) {
+                    item.classList.remove('is-active');
+                    item.setAttribute('aria-selected', 'false');
+                });
+                tab.classList.add('is-active');
+                tab.setAttribute('aria-selected', 'true');
+
+                if (activeLabel) {
+                    activeLabel.textContent = label;
+                }
+
+                panel.innerHTML = '';
+
+                fetch(url)
+                    .then(function(response) {
+                        if (!response.ok) {
+                            return {data: []};
+                        }
+                        return response.json();
+                    })
+                    .then(function(payload) {
+                        const posts = payload.data || [];
+
+                        if (viewAll) {
+                            viewAll.setAttribute('href', '<?php echo esc_url(home_url('/category/')); ?>' + category + '/');
+                        }
+
+                        if (!posts.length) {
+                            panel.innerHTML = '';
+                            return;
+                        }
+
+                        panel.innerHTML = posts.map(function(post) {
+                            const date = new Date(post.date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+
+                            return '<div class="municipal-ordinances-item"><a href="' + post.link + '">' + post.title + '</a><span class="municipal-ordinances-date">' + date + '</span></div>';
+                        }).join('');
+                    })
+                    .catch(function() {
+                        panel.innerHTML = '';
+                    });
+            });
+        });
+    })();
+    </script>
+    <?php
+
+    return ob_get_clean();
+}
 
 
 // =========================
@@ -1763,7 +2017,7 @@ function govph_awarded_projects_shortcode($atts) {
     return ob_get_clean();
 }
 // Register shortcode
-add_shortcode('ordinances', 'ordinances_shortcode');
+add_shortcode('municipal_ordinances', 'municipal_ordinances_shortcode');
 add_shortcode('latest_annual_reports', 'latest_annual_reports_shortcode');
 add_shortcode('annual_reports', 'latest_annual_reports_shortcode');
 add_shortcode('budget_overview', 'budget_overview_shortcode');
