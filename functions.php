@@ -57,7 +57,6 @@ add_action('wp_enqueue_scripts', 'news_feed_script');
         <div class="news-container data-news-container-<?php echo esc_attr($instance); ?>" 
         data-instance="<?php echo esc_attr($instance); ?>" data-endpoint="<?php echo esc_attr($request_url); ?>"
         style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:24px;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-            <h2>Latest News</h2>
 </xai:function_call.
 
 
