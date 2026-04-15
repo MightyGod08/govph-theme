@@ -2012,6 +2012,166 @@ function beneficiary_shortcode($atts) {
 add_shortcode('beneficiaries', 'beneficiary_shortcode');
 
 // =========================
+// MAP ASSET
+// =========================
 
-// 
+function cim_get_barangay_labels() {
+    return [
+        'tarosanan' => 'Tarosanan',
+        'sua' => 'Sua',
+        'stoTomas' => 'Sto. Tomas',
+        'stoDomingo' => 'Sto. Domingo',
+        'sanRoque' => 'San Roque',
+        'sanMateo' => 'San Mateo',
+        'sanMarcos' => 'San Marcos',
+        'sanLucas' => 'San Lucas',
+        'sanJuanSanRamon' => 'San Juan / San Ramon',
+        'sanJoseSanPablo' => 'San Jose / San Pablo',
+        'sanFrancisco' => 'San Francisco',
+        'marupit' => 'Marupit',
+        'dugcal' => 'Dugcal',
+    ];
+}
 
+function cim_get_barangay_routes() {
+    return [
+        'tarosanan' => '',
+        'sua' => '',
+        'stoTomas' => '',
+        'stoDomingo' => '',
+        'sanRoque' => '',
+        'sanMateo' => '',
+        'sanMarcos' => '',
+        'sanLucas' => '',
+        'sanJuanSanRamon' => '',
+        'sanJoseSanPablo' => '',
+        'sanFrancisco' => '',
+        'marupit' => '',
+        'dugcal' => '',
+    ];
+}
+
+function cim_get_road_types() {
+    return [
+        'national' => [
+            'label' => 'National Road',
+            'description' => 'Primary roads connecting to highways.',
+            'color' => '#00ff00',
+        ],
+        'provincial' => [
+            'label' => 'Provincial Road',
+            'description' => 'Inter-municipality roads.',
+            'color' => '#8ed400',
+        ],
+        'municipal' => [
+            'label' => 'Municipal Road',
+            'description' => 'Main local roads.',
+            'color' => '#ffe34d',
+        ],
+        'barangay' => [
+            'label' => 'Barangay Road',
+            'description' => 'Small local roads.',
+            'color' => '#d5d5ff',
+        ],
+    ];
+}
+
+/**
+ * Enqueue Assets
+ */
+function cim_enqueue_assets() {
+
+    $style_path = get_template_directory() . '/assets/images/camaligan-map.css';
+    $script_path = get_template_directory() . '/js/camaligan-map.js';
+
+    $style_version = file_exists($style_path) ? filemtime($style_path) : '1.0';
+    $script_version = file_exists($script_path) ? filemtime($script_path) : '1.0';
+
+    wp_register_style(
+        'cim-style',
+        get_template_directory_uri() . '/assets/images/camaligan-map.css',
+        [],
+        $style_version
+    );
+
+    wp_register_script(
+        'cim-script',
+        get_template_directory_uri() . '/js/camaligan-map.js',
+        [],
+        $script_version,
+        true
+    );
+
+    wp_localize_script('cim-script', 'camaliganMapData', [
+        'restUrl' => esc_url_raw(rest_url('camaligan-map/v1/barangay/')),
+        'labels'  => cim_get_barangay_labels(),
+        'routes'  => cim_get_barangay_routes(),
+        'roadTypes' => cim_get_road_types(),
+    ]);
+}
+add_action('wp_enqueue_scripts', 'cim_enqueue_assets');
+
+/**
+ * Shortcode
+ */
+function cim_render_map() {
+
+    wp_enqueue_style('cim-style');
+    wp_enqueue_script('cim-script');
+
+    $svg_path = get_template_directory() . '/assets/images/camaliganMap.svg';
+
+    if (!file_exists($svg_path)) {
+        return '<div class="cim-error">SVG not found</div>';
+    }
+
+    $svg = file_get_contents($svg_path);
+
+    ob_start();
+    ?>
+    <div class="cim-wrapper">
+        <div class="cim-map-container">
+            <?php echo $svg; ?>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('camaligan_interactive_map', 'cim_render_map');
+
+/**
+ * REST API
+ */
+function cim_register_routes() {
+    register_rest_route('camaligan-map/v1', '/barangay/(?P<slug>[a-zA-Z0-9_-]+)', [
+        'methods'  => 'GET',
+        'callback' => 'cim_get_barangay_data',
+        'permission_callback' => '__return_true',
+    ]);
+}
+add_action('rest_api_init', 'cim_register_routes');
+
+function cim_get_barangay_data($request) {
+
+    $slug = sanitize_text_field($request['slug']);
+    $data = cim_get_dataset();
+
+    if (!isset($data[$slug])) {
+        return new WP_REST_Response(['error' => 'Not found'], 404);
+    }
+
+    return new WP_REST_Response($data[$slug], 200);
+}
+
+function cim_get_dataset() {
+    $routes = cim_get_barangay_routes();
+
+    return [
+        'tarosanan' => [
+            'slug' => 'tarosanan',
+            'name' => 'Tarosanan',
+            'route' => $routes['tarosanan'],
+        ],
+        // add others same as before...
+    ];
+}

@@ -1,0 +1,293 @@
+.cim-wrapper {   display: flex;   justify-content: center;   margin: 24px 0;   min-width: 50rem; min-height: 50rem;   max-width: 80rem; }
+
+.cim-shell {   width: min(100%, 1160px);   min-width: 50rem;   container-type: inline-size;   background: #f8f7f3;   border: 2px solid #1a1a1a;   border-radius: 22px;   overflow: hidden;   box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1); }
+
+.cim-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  color: #111;
+  background: #fff;
+  border-bottom: 1px solid #d7d7d7;
+}
+
+.cim-toolbar label,
+.cim-barangay-select,
+.cim-map-tooltip {
+  font-size: 14px;
+}
+
+.cim-barangay-select {
+  min-width: min(100%, 280px);
+  padding: 10px 14px;
+  color: #1f2937;
+  background: #fff;
+  border: 1px solid #aeb4bb;
+  border-radius: 10px;
+}
+
+.cim-map-stage {
+  min-width: 0;
+  position: relative;
+  background: #fbfaf7;
+}
+
+.cim-map-controls {
+  position: absolute;
+  bottom: 18px;
+  left: 28px;
+  z-index: 6;
+  display: flex;
+  gap: 10px;
+}
+
+.cim-map-control {
+  min-width: 46px;
+  height: 44px;
+  padding: 0 14px;
+  color: #111;
+  background: #fff;
+  border: 2px solid #111;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.cim-map-control-fit,
+.cim-map-control-minus {
+  background: #f4f4f4;
+}
+
+.cim-map-control-fit {
+  min-width: 132px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cim-map-tooltip {
+  position: absolute;
+  z-index: 5;
+  padding: 10px 14px;
+  color: #fff;
+  background: rgba(32, 36, 42, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.24);
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: 1.3;
+  transform: translate(-50%, -100%);
+}
+
+.cim-map-container {
+  padding: 14px 16px 0;
+}
+
+.cim-map-viewport {
+  overflow: auto;
+  padding: 18px 14px 76px;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cim-map-viewport:active {
+  cursor: grabbing;
+}
+
+.cim-map-viewport:active .cim-barangay {
+  cursor: grabbing;
+}
+
+.cim-map-surface {   position: relative;   width: min(100%, 1080px);   min-width: 50rem;   margin: 0 auto;   transform-origin: top center;   transition: transform 0.18s ease; }
+
+.cim-map-container svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.cim-map-container #boundaries .cim-barangay {
+  fill: #fff;
+  fill-opacity: 0.9;
+  stroke: #111;
+  stroke-width: 1.55px;
+  cursor: grab;
+  pointer-events: visiblePainted;
+  transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.cim-map-container #boundaries .cim-barangay.is-hovered,
+.cim-map-container #boundaries .cim-barangay.is-active {
+  stroke: #111;
+  stroke-width: 2px;
+}
+
+.cim-map-container #boundaries .cim-barangay.is-hovered {
+  fill: #fff8cf;
+  fill-opacity: 1;
+}
+
+.cim-map-container #boundaries .cim-barangay.is-active {
+  fill: #ffe88d;
+  fill-opacity: 1;
+}
+
+.cim-map-container #boundaries .cim-barangay.is-hovered.is-active {
+  fill: #ffd95c;
+}
+
+.cim-map-container #boundaries .cim-barangay:focus {
+  outline: none;
+}
+
+.cim-map-container #river .cls-1 {
+  fill: #63c8ff;
+  fill-opacity: 0.72;
+  stroke: #2796d8;
+  stroke-width: 0.9px;
+  stroke-opacity: 0.5;
+}
+
+.cim-map-container #river,
+.cim-map-container #river *,
+.cim-map-container #roadNetwork,
+.cim-map-container #roadNetwork * {
+  pointer-events: none;
+}
+
+.cim-map-container .cls-3 {
+  stroke: #ff8ddd;
+  stroke-width: 1.15px;
+  opacity: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cim-map-container #roadNetwork .cim-road-national { stroke: #00ff00; stroke-width: 1.8px; }
+.cim-map-container #roadNetwork .cim-road-provincial { stroke: #8ed400; stroke-width: 1.6px; }
+.cim-map-container #roadNetwork .cim-road-municipal { stroke: #ffe34d; stroke-width: 1.45px; }
+.cim-map-container #roadNetwork .cim-road-barangay { stroke: #ff8ddd; stroke-width: 1.15px; }
+
+.cim-map-label {
+  display: none;
+}
+
+.cim-info-panel {
+  padding: 16px 18px 18px;
+  background: #fff;
+  border-top: 1px solid #dbe1e7;
+}
+
+.cim-info-panel-hidden {
+  display: none;
+}
+
+.cim-info-panel h3 {
+  margin: 0 0 10px;
+  color: #1f2937;
+}
+
+.cim-info-panel p {
+  margin: 0 0 8px;
+  color: #344054;
+}
+
+.cim-info-panel p:last-child {
+  margin-bottom: 0;
+}
+
+.cim-muted {
+  color: #667085;
+}
+
+.cim-info-panel a {
+  color: #8b1e24;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cim-info-route {
+  padding: 0;
+  color: #8b1e24;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cim-info-route:hover,
+.cim-info-route:focus {
+  text-decoration: underline;
+}
+
+.cim-info-route:disabled {
+  color: #98a2b3;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.cim-info-panel a:hover,
+.cim-info-panel a:focus {
+  text-decoration: underline;
+}
+
+.cim-error {
+  padding: 12px 16px;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  border-radius: 10px;
+}
+
+@media (max-width: 700px) {
+  .cim-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cim-barangay-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cim-map-container {
+    padding: 12px 12px 0;
+  }
+
+  .cim-map-controls {
+    bottom: 12px;
+    left: 14px;
+    gap: 8px;
+  }
+
+  .cim-map-control {
+    min-width: 44px;
+    height: 42px;
+    padding: 0 12px;
+    font-size: 24px;
+  }
+
+  .cim-map-control-fit {
+    min-width: 112px;
+    font-size: 11px;
+  }
+
+  .cim-map-viewport {
+    padding: 14px 10px 68px;
+  }
+
+  .cim-map-tooltip {
+    max-width: calc(100% - 32px);
+    white-space: normal;
+  }
+  
+}
