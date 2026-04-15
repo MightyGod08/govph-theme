@@ -2114,7 +2114,14 @@ add_action('wp_enqueue_scripts', 'cim_enqueue_assets');
 /**
  * Shortcode
  */
-function cim_render_map() {
+function cim_render_map($atts = []) {
+$atts = shortcode_atts([
+        'width' => '45vw',
+        'height' => '45vh'
+    ], $atts, 'camaligan_interactive_map');
+
+    $width = sanitize_text_field($atts['width']);
+    $height = sanitize_text_field($atts['height']);
 
     wp_enqueue_style('cim-style');
     wp_enqueue_script('cim-script');
@@ -2127,11 +2134,46 @@ function cim_render_map() {
 
     $svg = file_get_contents($svg_path);
 
+    // Inject width and height attributes into SVG tag
+    $svg = preg_replace(
+        '/<svg([^>]*)>/',
+        sprintf('<svg width="%s" height="%s" $1>', esc_attr($width), esc_attr($height)),
+        $svg,
+        1
+    );
+
+    // Generate barangay labels for select dropdown
+    $barangay_labels = cim_get_barangay_labels();
+
     ob_start();
     ?>
-    <div class="cim-wrapper">
-        <div class="cim-map-container">
-            <?php echo $svg; ?>
+    <div class="cim-wrapper" style="display: flex; justify-content: center; align-items: center; min-width: <?php echo esc_attr($width); ?>; min-height: <?php echo esc_attr($height); ?>;">
+        <div class="cim-shell">
+            <div class="cim-toolbar">
+                <label for="cim-barangay-select"><strong>Jump to barangay:</strong></label>
+                <select id="cim-barangay-select" class="cim-barangay-select">
+                    <option value="">Select a barangay</option>
+                    <?php foreach ($barangay_labels as $id => $label): ?>
+                        <option value="<?php echo esc_attr($id); ?>"><?php echo esc_html($label); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="cim-map-stage" id="cim-map-stage">
+                <div class="cim-map-controls" aria-label="Map controls">
+                    <button type="button" class="cim-map-control" id="cim-zoom-in" aria-label="Zoom in">+</button>
+                    <button type="button" class="cim-map-control cim-map-control-fit" id="cim-fit-map">Fit To Frame</button>
+                    <button type="button" class="cim-map-control cim-map-control-minus" id="cim-zoom-out" aria-label="Zoom out">-</button>
+                </div>
+                <div class="cim-map-tooltip" id="cim-map-tooltip" hidden></div>
+                <div class="cim-map-viewport" id="cim-map-viewport">
+                    <div class="cim-map-surface" id="cim-map-surface">
+                        <div class="cim-map-container">
+                            <?php echo $svg; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <aside class="cim-info-panel cim-info-panel-hidden" id="cim-info-panel" aria-live="polite" aria-hidden="true"></aside>
         </div>
     </div>
     <?php
