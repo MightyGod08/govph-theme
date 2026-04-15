@@ -1,9 +1,30 @@
-# TODO: Trigger-Based News Feed
+# Calendar Shortcode Improvement TODO
 
-## Steps:
-- [ ] 1. Create TODO.md with plan breakdown ✅
-- [x] 2. Edit js/news-feed.js: Remove setInterval, add IntersectionObserver for visibility-triggered refresh with per-instance intervals ✅
+## Approved Plan Steps
 
-- [x] 3. Test changes: Verify refresh on scroll-into-view, stops when hidden ✅
+### 1. Create TODO.md [✅ Completed]
 
-- [ ] 4. Complete task
+### 2. Edit functions.php
+- Clean whitespace/BR before table output
+- Add `class="pad"` to all empty padding `<td>`
+- Add `<tfoot>` with prev/next month links
+- Optimize inline styles (remove duplicates with theme.json)
+- Ensure table matches 40px cells
+
+### 3. Edit theme.json
+- Update `.pad` CSS: `visibility: hidden; background: transparent;`
+
+### 4. Edit js/calendar.js
+- Fix selectors to `.my-custom-styled-calendar`
+- Add URL param handling for dynamic months
+- Handle nav clicks
+
+### 5. Test
+- Insert [wp_calendar]
+- Verify blank padding, no BR, nav works
+- Check holidays/today highlighting
+
+### 6. attempt_completion
+
+**Progress: Getting started...**
+

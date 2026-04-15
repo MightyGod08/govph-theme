@@ -367,22 +367,24 @@ function holiday_calendar_shortcode($atts) {
     }
 
     // Render static grid
-    $date = new DateTime("$year-$month-01");
+    $date = new DateTime(($year)."-".($month + 1)."-01");
     $daysInMonth = (int) $date->format('t');
-    $firstDay = (int) $date->format('w'); // 0=Sun
-    $startPad = $firstDay === 0 ? 7 : $firstDay; // Pad Sun-Sat
+    $firstDayOfWeek = (int) $date->format('w'); // 0=Sun\n    $startPad = $firstDayOfWeek; // Correct padding: Sun=0 pads 0, Mon=1 pads 1, etc.
+    // test
+    // 0=Sun\n    $startPad = $firstDayOfWee    k; // Correct padding: Sun=0 pads 0, Mon=1 pads 1, etc.
+
+
 
     $today = new DateTime();
-$isTodayDay = ($year == $today->format('Y') && ($month + 1) == $today->format('n')) ? (int)$today->format('j') : 0;
+    $isTodayDay = ($year == $today->format('Y') && ($month + 1) == $today->format('n')) ? (int)$today->format('j') : 0;
     $monthName = $date->format('F Y');
 
-    ob_start();
-    ?>
-    <div class="my-custom-styled-calendar" style="max-width:380px;margin:0 auto;padding:20px;background:#f8f8f8;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.08);font-family:inherit;">
+    $output = '
+    <div class="my-custom-styled-calendar" data-year="' . $year . '" data-month="' . ($month + 1) . '" style="max-width:380px;margin:0 auto;padding:20px;background:#f8f8f8;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,0.08);font-family:inherit;">
         <div style="margin-bottom:18px;text-align:center;">
-            <h3 style="margin:0;font-size:28px;font-weight:700;color:#1f2937;"><?php echo $monthName; ?></h3>
+            <h3 style="margin:0;font-size:28px;font-weight:700;color:#1f2937;">' . $monthName . '</h3>
         </div>
-        <table id="static-cal-<?php echo $instance; ?>" style="width:100%;border-collapse:separate;border-spacing:8px;text-align:center;">
+        <table id="static-cal-' . $instance . '" style="width:100%;border-collapse:separate;border-spacing:8px;text-align:center;">
             <thead>
                 <tr>
                     <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Sun</th>
@@ -394,89 +396,84 @@ $isTodayDay = ($year == $today->format('Y') && ($month + 1) == $today->format('n
                     <th style="color:#6b7280;font-weight:600;padding:10px 0;font-size:15px;">Sat</th>
                 </tr>
             </thead>
-            <tbody>
-                <?php
-                $day = 1;
+            <tbody>';
 
-                // IMPORTANT: track weekday position (0–6)
-                $weekday = 0;
+    $day = 1;
 
-                // total 6 weeks max (calendar standard)
-                for ($row = 0; $row < 6; $row++) {
+    // for($day; $daysInMonth > 0; $day++) {
+        
 
-                    echo "<tr>";
+    // }
 
-                    for ($col = 0; $col < 7; $col++) {
 
-                        // FIRST ROW: apply start padding
-                        if ($row == 0 && $col < $startPad) {
-                            echo "<td></td>";
-                            continue;
-                        }
+    for ($row = 0; $row < 6; $row++) {
+    $output .= "<tr>";
 
-                        // stop if month is done
-                        if ($day > $daysInMonth) {
-                            echo "<td></td>";
-                            continue;
-                        }
+        for ($col = 0; $col < 7; $col++) {
 
-                        // reset weekday tracking
-                        $weekday = $col;
+            // Padding BEFORE first day
+            if ($row == 0 && $col < $firstDayOfWeek) {
+                $output .= '<td class="pad"></td>';
+            }
 
-                        // ---- HOLIDAY CHECK (OPTIMIZED) ----
-                        $isHoliday = false;
-                        foreach ($holidays as $h) {
-                            if (($h['day'] ?? null) == $day &&
-                                ($h['month'] ?? null) == ($month + 1) &&
-                                ($h['year'] ?? null) == $year) {
-                                $isHoliday = true;
-                                break;
-                            }
-                        }
+            // Padding AFTER last day
+            elseif ($day > $daysInMonth) {
+                $output .= '<td class="pad"></td>';
+            }
 
-                        // ---- TODAY CHECK ----
-                        $isTodayHighlight = ($isTodayDay > 0 && $day == $isTodayDay);
-
-                        // ---- STYLING ----
-                        $bg = $isHoliday ? '#fef2f2' : ($isTodayHighlight ? '#eab308' : 'transparent');
-                        $color = $isHoliday ? '#dc2626' : ($isTodayHighlight ? '#111827' : '#374151');
-                        $weight = ($isHoliday || $isTodayHighlight) ? '700' : '500';
-
-                        echo "
-                        <td style='
-                            width:38px;
-                            height:38px;
-                            padding:0;
-                            vertical-align:middle;
-                            font-size:16px;
-                            font-weight:$weight;
-                            color:$color;
-                            background:$bg;
-                            border-radius:8px;
-                        '>
-                            $day
-                        </td>";
-
-                        $day++;
-
-                        // break row early if week ends AND month continues
-                        if ($col == 6) {
-                            // end of week row
-                        }
-                    }
-
-                    echo "</tr>";
-
-                    if ($day > $daysInMonth) {
+            else {
+                // holiday check
+                $isHoliday = false;
+                foreach ($holidays as $h) {
+                    if (
+                        ($h["day"] ?? null) == $day &&
+                        ($h["month"] ?? null) == ($month + 1) &&
+                        ($h["year"] ?? null) == $year
+                    ) {
+                        $isHoliday = true;
                         break;
                     }
                 }
-                ?>
-                </tbody>
+
+                $isTodayHighlight = ($isTodayDay > 0 && $day == $isTodayDay);
+
+                $bg = $isHoliday ? "#fef2f2" : ($isTodayHighlight ? "#eab308" : "transparent");
+                $color = $isHoliday ? "#dc2626" : ($isTodayHighlight ? "#111827" : "#374151");
+                $weight = ($isHoliday || $isTodayHighlight) ? "700" : "500";
+
+                // Render day cell
+                $output .= '
+                <td style="
+                    width:40px; height:40px;
+                    padding:0; vertical-align:middle;
+                    font-size:16px; font-weight:' . $weight . ';
+                    color:' . $color . '; background:' . $bg . ';
+                    border-radius:8px;
+                ">' . $day . '</td>';
+
+                $day++;
+            }
+        }
+
+    $output .= "</tr>";
+
+    // Stop loop when done
+    if ($day > $daysInMonth) break;
+}
+
+    $output .= '
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" id="prev" style="padding:14px 0;font-size:14px;font-weight:600;"><a href="?year=' . ($year-1) . '&month=' . ($month+1) . '#cal" style="color:#1f2937;text-decoration:none;">‹ Prev</a></td>
+                    <td colspan="1"></td>
+                    <td colspan="3" id="next" style="padding:14px 0;font-size:14px;font-weight:600;text-align:right;"><a href="?year=' . ($year+1) . '&month=' . ($month+1) . '#cal" style="color:#1f2937;text-decoration:none;">Next ›</a></td>
+                </tr>
+            </tfoot>
         </table>
-    </div>
-    <?php
-    return ob_get_clean();
+    </div>';
+
+    return $output;
 }
 
 
